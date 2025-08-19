@@ -21,6 +21,9 @@ SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > ?;"
 # SQL statement to select only movies that have been watched
 SELECT_WATCHED_MOVIES = "SELECT * FROM movies WHERE watched = 1;"
 
+# SQL statement to update a movie's watched status to 1 (meaning watched)
+SET_MOVIE_WATCHED = "UPDATE movies SET watched = 1 WHERE title = ?;"
+
 # Establish a connection to the database file "data.db"
 # If the file does not exist, SQLite will create it
 connection = sqlite3.connect("data.db")
@@ -51,8 +54,9 @@ def get_movies(upcoming=False):
         return cursor.fetchall()  # Return the list of movies fetched
 
 
-def watch_movie(movie_title):
-    pass 
+def watch_movie(title):
+    with connection:  # Opens a transaction
+        connection.execute(SET_MOVIE_WATCHED, (title,))  # Update the movie's watched status to 1
 
 
 # Function to retrieve all watched movies
