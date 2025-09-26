@@ -1,81 +1,80 @@
-import datetime  # Importing the datetime module for working with dates and times
-import sqlite3   # Importing the sqlite3 module to interact with SQLite databases
+import datetime
+import sqlite3
 
-# SQL statement to create a table named 'movies' if it doesn’t already exist
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
-    title TEXT,                -- Column for movie title (string)
-    release_timestamp REAL,    -- Column for movie release date stored as a timestamp (float)
+    id INTEGER PRIMARY KEY,
+    title TEXT,
+    release_timestamp REAL
 );"""
 
-CREATE_WATCHLIST_TABLE = """CREATE TABLE IF NOT EXISTS watchlist (
-    watcher_name TEXT,           -- Column for the name of the person who watched the movie (string)
-    title TEXT,             -- Column for the name of the person who watched the movie (string)
+CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
+    username TEXT PRIMARY KEY
 );"""
 
-# SQL statement to insert a new movie into the movies table
-# Default "watched" is set to 0 (meaning not watched yet)
-INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp, watched) VALUES (?, ?);"
+CREATE_WATCHED_TABLE = """CREATE TABLE IF NOT EXISTS watched (
+    user_username TEXT,
+    movie_id INTEGER,
+    FOREIGN KEY(user_username) REFERENCES users(username),
+    FOREIGN KEY(movie_id) REFERENCES movies(id)
+);"""
 
-# SQL statement to delete a movie from the table
-DELETE_MOVIE = "DELETE FROM movies WHERE title = ?;"
-
-# SQL statement to select all movies from the table
+INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp) VALUES (?, ?)"
 SELECT_ALL_MOVIES = "SELECT * FROM movies;"
-
-# SQL statement to select only movies that are upcoming (release date after today)
 SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > ?;"
+INSERT_USER = "INSERT INTO users (username) VALUES (?)"
+INSERT_WATCHED_MOVIE = "INSERT INTO watched (user_username, movie_id) VALUES (?, ?)"
+SELECT_WATCHED_MOVIES = """SELECT movies.*
+FROM users
+JOIN watched ON users.username = watched.user_username
+JOIN movies ON watched.movie_id = movies.id
+WHERE users.username = ?;"""
+SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 
-# SQL statement to select only movies that have been watched
-SELECT_WATCHED_MOVIES = "SELECT * FROM watched WHERE watcher_name = ?;"
-
-# SQL statement to insert a new watched movie into the watchlist table
-INSERT_MOVIE_WATCHED = "INSERT INTO watched (watcher_name, title) VALUES (?, ?);"
-
-# SQL statement to update a movie's watched status to 1 (meaning watched)
-SET_MOVIE_WATCHED = "UPDATE movies SET watched = 1 WHERE title = ?;"
-
-
-
-# Establish a connection to the database file "data.db"
-# If the file does not exist, SQLite will create it
 connection = sqlite3.connect("data.db")
 
 
-# Function to create the movies table
 def create_tables():
-    with connection:  # Opens a transaction
-        connection.execute(CREATE_MOVIES_TABLE)  # Executes the create table SQL
-        connection.execute(CREATE_WATCHLIST_TABLE)  # Executes the create table SQL
+    with connection:
+        connection.execute(CREATE_MOVIES_TABLE)
+        connection.execute(CREATE_USERS_TABLE)
+        connection.execute(CREATE_WATCHED_TABLE)
 
 
-# Function to add a new movie to the database
 def add_movie(title, release_timestamp):
-    with connection:  # Opens a transaction
-        connection.execute(INSERT_MOVIE, (title, release_timestamp))  # Inserts movie into the table
+    with connection:
+        connection.execute(INSERT_MOVIE, (title, release_timestamp))
 
 
-# Function to retrieve movies from the database
-# If upcoming=True, only upcoming movies are returned
 def get_movies(upcoming=False):
-    with connection:  # Opens a transaction
-        cursor = connection.cursor()  # Creates a cursor to run queries
-        if upcoming:  # If user wants upcoming movies
-            today_timestamp = datetime.datetime.today().timestamp()  # Get today's date as timestamp
-            cursor.execute(SELECT_UPCOMING_MOVIES, (today_timestamp,))  # Query for upcoming movies
-        else:  # Otherwise return all movies
-            cursor.execute(SELECT_ALL_MOVIES)  # Query for all movies
-        return cursor.fetchall()  # Return the list of movies fetched
+    with connection:
+        cursor = connection.cursor()
+        if upcoming:
+            today_timestamp = datetime.datetime.today().timestamp()
+            cursor.execute(SELECT_UPCOMING_MOVIES, (today_timestamp,))
+        else:
+            cursor.execute(SELECT_ALL_MOVIES)
+        return cursor.fetchall()
 
 
-def watch_movie(username,title):
-    with connection:  # Opens a transaction
-        connection.execute(DELETE_MOVIE, (title,))  # Deletes the movie from the table
-        connection.execute(INSERT_MOVIE_WATCHED, (username,title,))  # Inserts movie into the watched table
+def add_user(username):
+    with connection:
+        connection.execute(INSERT_USER, (username,))
 
 
-# Function to retrieve all watched movies
+def watch_movie(username, movie_id):
+    with connection:
+        connection.execute(INSERT_WATCHED_MOVIE, (username, movie_id))
+
+
 def get_watched_movies(username):
-    with connection:  # Opens a transaction
-        cursor = connection.cursor()  # Creates a cursor to run queries
-        cursor.execute(SELECT_WATCHED_MOVIES,(username))  # Query for watched movies
-        return cursor.fetchall()  # Return the list of watched movies
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_WATCHED_MOVIES, (username,))
+        return cursor.fetchall()
+
+
+def search_movies(search_term):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
+        return cursor.fetchall()
