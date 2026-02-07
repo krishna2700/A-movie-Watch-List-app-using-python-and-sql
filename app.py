@@ -1,6 +1,7 @@
 import datetime
 import database
 
+# Movie watchlist application with SQLite database backend
 menu = """Please select one of the following options:
 1) Add new movie.
 2) View upcoming movies.
