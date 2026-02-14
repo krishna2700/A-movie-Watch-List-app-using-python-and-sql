@@ -1,6 +1,10 @@
 import datetime
 import database
 
+# TODO: Add input validation for all user prompts (dates, movie IDs, usernames)
+# TODO: Add error handling for database operations (e.g., duplicate users, invalid FKs)
+# TODO: Add options to delete or edit movies and users
+
 menu = """Please select one of the following options:
 1) Add new movie.
 2) View upcoming movies.
@@ -20,6 +24,7 @@ def prompt_add_movie():
     release_date = input(
         "Release date (dd-mm-YYYY): "
     ) or datetime.datetime.today().strftime("%d-%m-%Y")
+    # TODO: Validate date format and catch ValueError for malformed input
     release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
     database.add_movie(title, release_timestamp)
 
@@ -36,6 +41,7 @@ def print_movie_list(heading, movies):
 def prompt_watch_movie():
     username = input("Username: ")
     movie_id = input("Movie ID: ")
+    # TODO: Verify username and movie_id exist before inserting to avoid orphaned records
     database.watch_movie(username, movie_id)
 
 

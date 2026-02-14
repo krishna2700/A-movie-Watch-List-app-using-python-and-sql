@@ -1,6 +1,11 @@
 import datetime
 import sqlite3
 
+# TODO: Enable foreign key enforcement with PRAGMA foreign_keys = ON
+# TODO: Make the database path configurable (e.g., via environment variable)
+# TODO: Add a UNIQUE constraint on watched(user_username, movie_id) to prevent duplicate watches
+# TODO: Add functions to delete/update movies and users
+
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY,
     title TEXT,
@@ -32,6 +37,7 @@ SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
 connection = sqlite3.connect("data.db")
+# TODO: Execute 'PRAGMA foreign_keys = ON' here to enforce FK constraints
 
 
 def create_tables():

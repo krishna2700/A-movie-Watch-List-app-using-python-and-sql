@@ -13,7 +13,7 @@ A command-line movie watchlist application built with Python and SQLite. Track m
 
 ## Prerequisites
 
-- Python 3.6+
+- Python 3.8+ (the walrus operator `:=` used in `app.py` requires 3.8 or later)
 
 No external dependencies are required. The app uses Python's built-in `sqlite3` module.
 
@@ -22,14 +22,14 @@ No external dependencies are required. The app uses Python's built-in `sqlite3` 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/<your-username>/A-movie-Watch-List-app-using-python-and-sql.git
+   git clone <repository-url>
    cd A-movie-Watch-List-app-using-python-and-sql
    ```
 
 2. **Run the application**
 
    ```bash
-   python app.py
+   python3 app.py
    ```
 
    The database file (`data.db`) is created automatically on first run.
@@ -97,3 +97,71 @@ An index (`movies_release_idx`) is created on `movies.release_timestamp` for eff
 ├── data.db         # SQLite database (auto-created)
 └── README.md
 ```
+
+## Example Session
+
+```
+Welcome to the watchlist app!
+
+Please select one of the following options:
+...
+Your selection: 6
+Username: alice
+
+Your selection: 1
+Movie title: Inception
+Release date (dd-mm-YYYY): 16-07-2010
+
+Your selection: 1
+Movie title: Dune Part Three
+Release date (dd-mm-YYYY): 15-03-2026
+
+Your selection: 3
+-- All movies --
+1: Inception (on Jul 16 2010)
+2: Dune Part Three (on Mar 15 2026)
+----
+
+Your selection: 4
+Username: alice
+Movie ID: 1
+
+Your selection: 5
+Username: alice
+-- Watched movies --
+1: Inception (on Jul 16 2010)
+----
+
+Your selection: 7
+Enter partial movie title: dune
+-- Movies found movies --
+2: Dune Part Three (on Mar 15 2026)
+----
+
+Your selection: 8
+```
+
+## Known Limitations / Future Improvements
+
+<!-- TODO: These are open issues worth addressing in future iterations. -->
+
+- **Python version** — Requires 3.8+ due to the walrus operator (`:=`). Consider refactoring for broader compatibility if needed.
+- **No input validation** — Invalid dates, non-existent usernames, or bad movie IDs will raise unhandled exceptions.
+- **No delete or edit** — Movies and users cannot be updated or removed once added.
+- **Duplicate watches** — A user can mark the same movie as watched multiple times; there is no uniqueness constraint on the `watched` table.
+- **Foreign key enforcement** — SQLite foreign keys are defined but not enforced at runtime (`PRAGMA foreign_keys` is not enabled), so orphaned references are possible.
+- **No pagination** — Large movie lists are printed in full with no paging.
+- **Hardcoded DB path** — The database file is always `data.db` in the current working directory; consider making it configurable via an environment variable.
+- **No tests** — The project has no automated test suite yet.
+
+## Contributing
+
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/my-feature`).
+3. Commit your changes (`git commit -m "Add my feature"`).
+4. Push to the branch (`git push origin feature/my-feature`).
+5. Open a Pull Request.
+
+## License
+
+This project is not currently published under a specific license. Add a `LICENSE` file to define distribution terms.
