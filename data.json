@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "The Matrix",
+    "release_date": "1999-03-31",
+    "genre": "Science Fiction",
+    "rating": 8.7
+  },
+  {
+    "id": 2,
+    "title": "Inception",
+    "release_date": "2010-07-16",
+    "genre": "Science Fiction",
+    "rating": 8.8
+  }
+]
