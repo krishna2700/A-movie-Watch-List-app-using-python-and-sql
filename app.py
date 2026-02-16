@@ -10,6 +10,7 @@ menu = """Please select one of the following options:
 6) Add user to the app.
 7) Search for a movie.
 8) Exit.
+9) List APIs.
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
@@ -54,6 +55,17 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
+def list_apis():
+    print("-- Available APIs --")
+    print("add_movie(title, release_timestamp)")
+    print("get_movies(upcoming=False)")
+    print("watch_movie(username, movie_id)")
+    print("get_watched_movies(username)")
+    print("add_user(username)")
+    print("search_movies(search_term)")
+    print("---- \n")
+
+
 print(welcome)
 database.create_tables()
 
@@ -82,5 +94,7 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "9":
+        list_apis()
     else:
         print("Invalid input, please try again!")
