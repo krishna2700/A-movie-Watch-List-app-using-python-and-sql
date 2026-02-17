@@ -8,7 +8,16 @@ CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
 );"""
 
 CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY
+    username TEXT PRIMARY KEY,
+    last_workspace TEXT DEFAULT 'personal'
+);"""
+
+CREATE_WORKSPACES_TABLE = """CREATE TABLE IF NOT EXISTS workspaces (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    user_username TEXT,
+    FOREIGN KEY(user_username) REFERENCES users(username)
 );"""
 
 CREATE_WATCHED_TABLE = """CREATE TABLE IF NOT EXISTS watched (
@@ -30,6 +39,10 @@ JOIN movies ON watched.movie_id = movies.id
 WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
+INSERT_WORKSPACE = "INSERT INTO workspaces (name, type, user_username) VALUES (?, ?, ?)"
+SELECT_USER_WORKSPACES = "SELECT * FROM workspaces WHERE user_username = ?;"
+UPDATE_LAST_WORKSPACE = "UPDATE users SET last_workspace = ? WHERE username = ?"
+GET_LAST_WORKSPACE = "SELECT last_workspace FROM users WHERE username = ?"
 
 connection = sqlite3.connect("data.db")
 
@@ -38,6 +51,7 @@ def create_tables():
     with connection:
         connection.execute(CREATE_MOVIES_TABLE)
         connection.execute(CREATE_USERS_TABLE)
+        connection.execute(CREATE_WORKSPACES_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
 
@@ -80,3 +94,28 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def add_workspace(name, workspace_type, username):
+    with connection:
+        connection.execute(INSERT_WORKSPACE, (name, workspace_type, username))
+
+
+def get_user_workspaces(username):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_USER_WORKSPACES, (username,))
+        return cursor.fetchall()
+
+
+def update_last_workspace(username, workspace_name):
+    with connection:
+        connection.execute(UPDATE_LAST_WORKSPACE, (workspace_name, username))
+
+
+def get_last_workspace(username):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(GET_LAST_WORKSPACE, (username,))
+        result = cursor.fetchone()
+        return result[0] if result else 'personal'
