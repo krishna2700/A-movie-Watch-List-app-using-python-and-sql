@@ -30,6 +30,10 @@ JOIN movies ON watched.movie_id = movies.id
 WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
+CREATE_SETTINGS_TABLE = """CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+);"""
 
 connection = sqlite3.connect("data.db")
 
@@ -40,6 +44,7 @@ def create_tables():
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
+        connection.execute(CREATE_SETTINGS_TABLE)
 
 
 def add_movie(title, release_timestamp):
@@ -80,3 +85,33 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def get_setting(key, default=None):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute("SELECT value FROM settings WHERE key = ?", (key,))
+        result = cursor.fetchone()
+        if result is None:
+            return default
+        return result[0]
+
+
+def set_setting(key, value):
+    with connection:
+        connection.execute(
+            """
+            INSERT INTO settings (key, value)
+            VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value;
+            """,
+            (key, value),
+        )
+
+
+def get_last_workspace():
+    return get_setting("last_workspace", "personal")
+
+
+def set_last_workspace(workspace):
+    set_setting("last_workspace", workspace)
