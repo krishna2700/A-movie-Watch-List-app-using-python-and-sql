@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Blue Button Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .blue-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blue-button:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
+        }
+
+        .blue-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(33, 150, 243, 0.4);
+        }
+
+        #console-output {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            min-height: 150px;
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .console-line {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #2196F3;
+            padding-left: 10px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .agent-log {
+            color: #2196F3;
+            font-weight: bold;
+        }
+
+        .info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Agent System</h1>
+        <button id="multiAgentButton" class="blue-button">Click Me</button>
+        <div class="info">Check browser console (F12) to see "hello" logged</div>
+        <div id="console-output"></div>
+    </div>
+
+    <script>
+        // Multi-Agent System Implementation
+
+        class Agent {
+            constructor(name, task) {
+                this.name = name;
+                this.task = task;
+            }
+
+            async execute() {
+                console.log(`[Agent: ${this.name}] Executing task: ${this.task}`);
+                return await this.task();
+            }
+        }
+
+        class MultiAgentSystem {
+            constructor() {
+                this.agents = [];
+                this.consoleOutput = document.getElementById('console-output');
+            }
+
+            addAgent(agent) {
+                this.agents.push(agent);
+            }
+
+            log(message, isAgent = false) {
+                console.log(message);
+                const logLine = document.createElement('div');
+                logLine.className = 'console-line';
+                if (isAgent) {
+                    logLine.innerHTML = `<span class="agent-log">${message}</span>`;
+                } else {
+                    logLine.textContent = message;
+                }
+                this.consoleOutput.appendChild(logLine);
+                this.consoleOutput.scrollTop = this.consoleOutput.scrollHeight;
+            }
+
+            async executeAll() {
+                this.log('=== Multi-Agent System Activated ===', true);
+                
+                for (const agent of this.agents) {
+                    try {
+                        await agent.execute();
+                    } catch (error) {
+                        console.error(`Agent ${agent.name} failed:`, error);
+                        this.log(`❌ Agent ${agent.name} failed: ${error.message}`);
+                    }
+                }
+                
+                this.log('=== All Agents Completed ===', true);
+            }
+        }
+
+        // Initialize Multi-Agent System
+        const multiAgentSystem = new MultiAgentSystem();
+
+        // Define Agent 1: Console Logger
+        const consoleAgent = new Agent('ConsoleAgent', async () => {
+            multiAgentSystem.log('[ConsoleAgent] Logging message to console...', true);
+            console.log('hello');
+            multiAgentSystem.log('✓ Logged: "hello" to browser console');
+            return 'hello';
+        });
+
+        // Define Agent 2: Data Processor
+        const dataAgent = new Agent('DataAgent', async () => {
+            multiAgentSystem.log('[DataAgent] Processing data...', true);
+            const data = { message: 'hello', timestamp: new Date().toISOString() };
+            multiAgentSystem.log(`✓ Processed data: ${JSON.stringify(data)}`);
+            return data;
+        });
+
+        // Define Agent 3: Display Agent
+        const displayAgent = new Agent('DisplayAgent', async () => {
+            multiAgentSystem.log('[DisplayAgent] Updating UI state...', true);
+            multiAgentSystem.log('✓ UI state updated successfully');
+            return true;
+        });
+
+        // Define Agent 4: Validation Agent
+        const validationAgent = new Agent('ValidationAgent', async () => {
+            multiAgentSystem.log('[ValidationAgent] Validating operations...', true);
+            const isValid = true;
+            multiAgentSystem.log(`✓ Validation result: ${isValid ? 'PASSED' : 'FAILED'}`);
+            return isValid;
+        });
+
+        // Add agents to the multi-agent system
+        multiAgentSystem.addAgent(consoleAgent);
+        multiAgentSystem.addAgent(dataAgent);
+        multiAgentSystem.addAgent(displayAgent);
+        multiAgentSystem.addAgent(validationAgent);
+
+        // Button click handler
+        document.getElementById('multiAgentButton').addEventListener('click', async () => {
+            // Primary console.log as requested
+            console.log('hello');
+            
+            // Execute multi-agent system
+            await multiAgentSystem.executeAll();
+        });
+
+        // Initial log
+        multiAgentSystem.log('🚀 Multi-Agent System Ready. Click the blue button to activate.', true);
+    </script>
+</body>
+</html>
