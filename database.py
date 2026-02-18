@@ -1,10 +1,15 @@
 import datetime
+import os
 import sqlite3
+
+# Use absolute path to ensure the same DB is used regardless of working directory
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.db")
 
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY,
     title TEXT,
-    release_timestamp REAL
+    release_timestamp REAL,
+    image BLOB
 );"""
 
 CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
@@ -18,7 +23,7 @@ CREATE_WATCHED_TABLE = """CREATE TABLE IF NOT EXISTS watched (
     FOREIGN KEY(movie_id) REFERENCES movies(id)
 );"""
 
-INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp) VALUES (?, ?)"
+INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp, image) VALUES (?, ?, ?)"
 SELECT_ALL_MOVIES = "SELECT * FROM movies;"
 SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > ?;"
 INSERT_USER = "INSERT INTO users (username) VALUES (?)"
@@ -31,7 +36,10 @@ WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
-connection = sqlite3.connect("data.db")
+UPDATE_MOVIE_IMAGE = "UPDATE movies SET image = ? WHERE id = ?;"
+SELECT_MOVIE_IMAGE = "SELECT id, title, image FROM movies WHERE id = ?;"
+
+connection = sqlite3.connect(DB_PATH)
 
 
 def create_tables():
@@ -40,11 +48,21 @@ def create_tables():
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
+        _migrate_add_image_column()
 
 
-def add_movie(title, release_timestamp):
+def _migrate_add_image_column():
+    """Add image column to existing movies table if it doesn't exist."""
+    cursor = connection.cursor()
+    cursor.execute("PRAGMA table_info(movies);")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "image" not in columns:
+        connection.execute("ALTER TABLE movies ADD COLUMN image BLOB;")
+
+
+def add_movie(title, release_timestamp, image=None):
     with connection:
-        connection.execute(INSERT_MOVIE, (title, release_timestamp))
+        connection.execute(INSERT_MOVIE, (title, release_timestamp, image))
 
 
 def get_movies(upcoming=False):
@@ -80,3 +98,17 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def add_movie_image(movie_id, image_data):
+    """Store image binary data for a movie."""
+    with connection:
+        connection.execute(UPDATE_MOVIE_IMAGE, (image_data, movie_id))
+
+
+def get_movie_image(movie_id):
+    """Retrieve image binary data for a movie. Returns (id, title, image_blob) or None."""
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_MOVIE_IMAGE, (movie_id,))
+        return cursor.fetchone()
