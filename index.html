@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Blue Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .button-container {
+            text-align: center;
+        }
+
+        .blue-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .blue-button:hover {
+            background-color: #0056b3;
+        }
+
+        .blue-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <button class="blue-button" onclick="multiAgentHandler()">Click Me!</button>
+    </div>
+
+    <script>
+        // Multi-agent system simulation
+        class Agent {
+            constructor(name, id) {
+                this.name = name;
+                this.id = id;
+            }
+
+            execute() {
+                console.log(`[Agent ${this.id}] ${this.name}: hello`);
+            }
+        }
+
+        class MultiAgentSystem {
+            constructor() {
+                this.agents = [];
+            }
+
+            addAgent(agent) {
+                this.agents.push(agent);
+            }
+
+            executeAll() {
+                console.log('=== Multi-Agent System Activated ===');
+                this.agents.forEach(agent => agent.execute());
+                console.log('=== All Agents Completed ===');
+            }
+        }
+
+        // Initialize multi-agent system
+        const agentSystem = new MultiAgentSystem();
+
+        // Create multiple agents
+        agentSystem.addAgent(new Agent('Communication Agent', 1));
+        agentSystem.addAgent(new Agent('Processing Agent', 2));
+        agentSystem.addAgent(new Agent('Analysis Agent', 3));
+        agentSystem.addAgent(new Agent('Response Agent', 4));
+
+        // Button click handler
+        function multiAgentHandler() {
+            agentSystem.executeAll();
+        }
+    </script>
+</body>
+</html>
