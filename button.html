@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Button - Click to Turn Red</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        #colorButton {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        #colorButton:hover {
+            background-color: #0056b3;
+        }
+        
+        #colorButton.red {
+            background-color: #dc3545;
+        }
+        
+        #colorButton.red:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive Color Button</h1>
+        <button id="colorButton" onclick="changeColor()">Click Me!</button>
+    </div>
+
+    <script>
+        function changeColor() {
+            const button = document.getElementById('colorButton');
+            button.classList.toggle('red');
+        }
+    </script>
+</body>
+</html>
