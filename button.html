@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Toggle Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        #colorButton {
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #2563eb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #colorButton:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <button id="colorButton" onclick="turnRed()">Click Me</button>
+
+    <script>
+        function turnRed() {
+            document.getElementById('colorButton').style.backgroundColor = '#dc2626';
+        }
+    </script>
+</body>
+</html>
