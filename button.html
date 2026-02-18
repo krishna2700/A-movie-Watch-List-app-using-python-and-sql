@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue to Red Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .button {
+            background-color: blue;
+            color: white;
+            font-size: 18px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+        }
+
+        .button.red {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <button class="button" id="colorButton">Click Me!</button>
+
+    <script>
+        const button = document.getElementById('colorButton');
+        
+        button.addEventListener('click', function() {
+            button.classList.add('red');
+        });
+    </script>
+</body>
+</html>
