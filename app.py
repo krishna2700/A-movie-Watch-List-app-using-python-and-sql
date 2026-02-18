@@ -9,7 +9,8 @@ menu = """Please select one of the following options:
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
-8) Exit.
+8) Pink button
+9) Exit.
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
@@ -54,10 +55,14 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
+def pink_button():
+    print("pink")
+
+
 print(welcome)
 database.create_tables()
 
-while (user_input := input(menu)) != "8":
+while (user_input := input(menu)) != "9":
     if user_input == "1":
         prompt_add_movie()
     elif user_input == "2":
@@ -82,5 +87,7 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "8":
+        pink_button()
     else:
         print("Invalid input, please try again!")
