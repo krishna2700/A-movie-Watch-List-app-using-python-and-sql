@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi Agent Button</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: #f5f6f8;
+      }
+
+      .multi-agent-button {
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .multi-agent-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(37, 99, 235, 0.3);
+      }
+
+      .multi-agent-button:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <button class="multi-agent-button" id="multi-agent-button" type="button">
+      Multi Agent
+    </button>
+
+    <script>
+      const button = document.getElementById("multi-agent-button");
+      button.addEventListener("click", () => {
+        console.log("hello");
+      });
+    </script>
+  </body>
+</html>
