@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Blue Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .blue-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(33, 150, 243, 0.3);
+        }
+
+        .blue-button:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+        }
+
+        .blue-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+
+        .info {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .agent-status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .agent-log {
+            color: #4CAF50;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Agent Blue Button</h1>
+        <button class="blue-button" id="multiAgentButton">Click Me!</button>
+        <div class="info">Open the browser console (F12) to see the multi-agent output</div>
+        <div class="agent-status" id="agentStatus">
+            <div>Agents ready. Click the button to activate.</div>
+        </div>
+    </div>
+
+    <script>
+        // Multi-Agent System
+        class Agent {
+            constructor(name, color) {
+                this.name = name;
+                this.color = color;
+            }
+
+            execute(message) {
+                console.log(`%c[${this.name}] ${message}`, `color: ${this.color}; font-weight: bold;`);
+                return `${this.name} processed: ${message}`;
+            }
+
+            logActivity(activity) {
+                console.log(`%c[${this.name}] Activity: ${activity}`, `color: ${this.color}; font-style: italic;`);
+            }
+        }
+
+        // Create multiple agents
+        const agents = [
+            new Agent('Agent Alpha', '#FF6B6B'),
+            new Agent('Agent Beta', '#4ECDC4'),
+            new Agent('Agent Gamma', '#45B7D1'),
+            new Agent('Agent Delta', '#FFA07A'),
+            new Agent('Agent Epsilon', '#98D8C8')
+        ];
+
+        // Multi-agent coordinator
+        class MultiAgentCoordinator {
+            constructor(agents) {
+                this.agents = agents;
+                this.clickCount = 0;
+            }
+
+            handleClick() {
+                this.clickCount++;
+                console.log('%c========================================', 'color: #2196F3; font-weight: bold;');
+                console.log(`%c🚀 Multi-Agent System Activated (Click #${this.clickCount})`, 'color: #2196F3; font-size: 16px; font-weight: bold;');
+                console.log('%c========================================', 'color: #2196F3; font-weight: bold;');
+
+                // Each agent processes the message
+                this.agents.forEach((agent, index) => {
+                    setTimeout(() => {
+                        agent.logActivity('Initializing...');
+                        agent.execute('hello');
+                        agent.logActivity('Task completed');
+                    }, index * 100);
+                });
+
+                // Coordinator summary
+                setTimeout(() => {
+                    console.log('%c========================================', 'color: #2196F3; font-weight: bold;');
+                    console.log(`%c✅ All ${this.agents.length} agents completed their tasks`, 'color: #4CAF50; font-weight: bold;');
+                    console.log('%c========================================', 'color: #2196F3; font-weight: bold;');
+                }, this.agents.length * 100 + 100);
+
+                // Update UI status
+                this.updateStatus();
+            }
+
+            updateStatus() {
+                const statusDiv = document.getElementById('agentStatus');
+                const timestamp = new Date().toLocaleTimeString();
+                statusDiv.innerHTML = `
+                    <div class="agent-log">✓ Click #${this.clickCount} at ${timestamp}</div>
+                    <div class="agent-log">✓ ${this.agents.length} agents activated</div>
+                    <div class="agent-log">✓ All agents logged "hello" to console</div>
+                    <div style="margin-top: 10px; color: #666;">Check the browser console for detailed output</div>
+                `;
+            }
+        }
+
+        // Initialize the multi-agent system
+        const coordinator = new MultiAgentCoordinator(agents);
+
+        // Attach event listener to the button
+        document.getElementById('multiAgentButton').addEventListener('click', function() {
+            coordinator.handleClick();
+        });
+
+        // Initial console message
+        console.log('%c🤖 Multi-Agent System Ready', 'color: #2196F3; font-size: 18px; font-weight: bold;');
+        console.log(`%cSystem initialized with ${agents.length} agents`, 'color: #666;');
+        agents.forEach(agent => {
+            console.log(`%c  • ${agent.name}`, `color: ${agent.color};`);
+        });
+    </script>
+</body>
+</html>
