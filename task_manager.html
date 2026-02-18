@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager with Multi-Agent Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .task-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-in-progress {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-stopped {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .agent-icons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .agent-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            position: relative;
+        }
+
+        .agent-icon.agent-1 { background: #3498db; }
+        .agent-icon.agent-2 { background: #e74c3c; }
+        .agent-icon.agent-3 { background: #2ecc71; }
+        .agent-icon.agent-4 { background: #f39c12; }
+        .agent-icon.agent-5 { background: #9b59b6; }
+
+        .agent-icon.stopped::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: #dc3545;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .pause-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pause-btn:hover {
+            background: #5a6268;
+        }
+
+        .pause-btn.paused {
+            background: #28a745;
+        }
+
+        .pause-btn.paused:hover {
+            background: #218838;
+        }
+
+        .followup-tasks {
+            margin-top: 15px;
+            padding-left: 20px;
+            border-left: 3px solid #e9ecef;
+        }
+
+        .followup-task {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .followup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .followup-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .agent-controls {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .agent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .agent-toggle {
+            padding: 4px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .agent-toggle.running {
+            background: #28a745;
+            color: white;
+        }
+
+        .agent-toggle.stopped {
+            background: #dc3545;
+            color: white;
+        }
+
+        .add-followup-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .add-followup-btn:hover {
+            background: #0056b3;
+        }
+
+        .pulse-icon {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: currentColor;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Multi-Agent Task Manager</h1>
+        
+        <div id="tasks-container"></div>
+        
+        <button class="add-followup-btn" onclick="addMainTask()">+ Add Main Task</button>
+    </div>
+
+    <div id="pauseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Select Agents to Pause</div>
+            <div class="modal-body" id="modalAgentList"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePauseModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyPause()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tasks = [
+            {
+                id: 1,
+                title: "Build Authentication System",
+                status: "completed",
+                agents: [
+                    { id: 1, name: "Agent 1", active: true },
+                    { id: 2, name: "Agent 2", active: true }
+                ],
+                followups: [
+                    {
+                        id: 101,
+                        title: "Add OAuth Integration",
+                        status: "in-progress",
+                        agents: [
+                            { id: 1, name: "Agent 1", active: true },
+                            { id: 3, name: "Agent 3", active: true }
+                        ]
+                    },
+                    {
+                        id: 102,
+                        title: "Implement Password Reset",
+                        status: "in-progress",
+                        agents: [
+                            { id: 2, name: "Agent 2", active: false },
+                            { id: 4, name: "Agent 4", active: true }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Design Database Schema",
+                status: "in-progress",
+                agents: [
+                    { id: 1, name: "Agent 1", active: true },
+                    { id: 3, name: "Agent 3", active: true },
+                    { id: 5, name: "Agent 5", active: true }
+                ],
+                followups: []
+            }
+        ];
+
+        let currentTaskForPause = null;
+
+        function getStatusBadge(task) {
+            const activeAgents = task.agents.filter(a => a.active);
+            const stoppedAgents = task.agents.filter(a => !a.active);
+            
+            let status = task.status;
+            let statusClass = `status-${status}`;
+            let statusText = status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' ');
+            
+            // Determine actual status based on agents
+            if (task.status === 'in-progress') {
+                if (activeAgents.length === 0) {
+                    status = 'stopped';
+                    statusClass = 'status-stopped';
+                    statusText = 'Stopped';
+                } else if (stoppedAgents.length > 0) {
+                    statusText = 'In Progress (Partial)';
+                }
+            }
+            
+            let agentIconsHTML = '';
+            if (task.status === 'in-progress' || task.status === 'stopped') {
+                agentIconsHTML = '<div class="agent-icons">';
+                
+                // Show active agents
+                activeAgents.forEach(agent => {
+                    agentIconsHTML += `<div class="agent-icon agent-${agent.id}" title="${agent.name} - Running">A${agent.id}</div>`;
+                });
+                
+                // Show stopped agents with indicator
+                stoppedAgents.forEach(agent => {
+                    agentIconsHTML += `<div class="agent-icon agent-${agent.id} stopped" title="${agent.name} - Stopped">A${agent.id}</div>`;
+                });
+                
+                agentIconsHTML += '</div>';
+            }
+            
+            let pulseIcon = '';
+            if (status === 'in-progress' && activeAgents.length > 0) {
+                pulseIcon = '<span class="pulse-icon"></span>';
+            }
+            
+            return `
+                <div class="status-badge ${statusClass}">
+                    ${pulseIcon}
+                    ${statusText}
+                    ${agentIconsHTML}
+                </div>
+            `;
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            container.innerHTML = tasks.map(task => `
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-status">
+                            ${getStatusBadge(task)}
+                            ${task.status === 'in-progress' ? `
+                                <button class="pause-btn" onclick="openPauseModal(${task.id}, null)">
+                                    ⏸ Pause Agents
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${task.followups.length > 0 ? `
+                        <div class="followup-tasks">
+                            <strong>Followup Tasks:</strong>
+                            ${task.followups.map(followup => `
+                                <div class="followup-task">
+                                    <div class="followup-header">
+                                        <div class="followup-title">${followup.title}</div>
+                                        ${getStatusBadge(followup)}
+                                    </div>
+                                    ${followup.status === 'in-progress' ? `
+                                        <button class="pause-btn" onclick="openPauseModal(${task.id}, ${followup.id})">
+                                            ⏸ Pause Agents
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <button class="add-followup-btn" onclick="addFollowupTask(${task.id})">
+                        + Add Followup Task
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openPauseModal(taskId, followupId) {
+            currentTaskForPause = { taskId, followupId };
+            
+            const task = tasks.find(t => t.id === taskId);
+            const targetTask = followupId ? task.followups.find(f => f.id === followupId) : task;
+            
+            const modalBody = document.getElementById('modalAgentList');
+            modalBody.innerHTML = targetTask.agents.map(agent => `
+                <div class="agent-item">
+                    <div class="agent-info">
+                        <div class="agent-icon agent-${agent.id}">A${agent.id}</div>
+                        <span>${agent.name}</span>
+                    </div>
+                    <button 
+                        class="agent-toggle ${agent.active ? 'running' : 'stopped'}" 
+                        onclick="toggleAgent(${agent.id})"
+                        id="agent-toggle-${agent.id}"
+                    >
+                        ${agent.active ? 'Running' : 'Stopped'}
+                    </button>
+                </div>
+            `).join('');
+            
+            document.getElementById('pauseModal').classList.add('active');
+        }
+
+        function closePauseModal() {
+            document.getElementById('pauseModal').classList.remove('active');
+            currentTaskForPause = null;
+        }
+
+        function toggleAgent(agentId) {
+            const task = tasks.find(t => t.id === currentTaskForPause.taskId);
+            const targetTask = currentTaskForPause.followupId 
+                ? task.followups.find(f => f.id === currentTaskForPause.followupId) 
+                : task;
+            
+            const agent = targetTask.agents.find(a => a.id === agentId);
+            agent.active = !agent.active;
+            
+            const btn = document.getElementById(`agent-toggle-${agentId}`);
+            btn.className = `agent-toggle ${agent.active ? 'running' : 'stopped'}`;
+            btn.textContent = agent.active ? 'Running' : 'Stopped';
+        }
+
+        function applyPause() {
+            const task = tasks.find(t => t.id === currentTaskForPause.taskId);
+            const targetTask = currentTaskForPause.followupId 
+                ? task.followups.find(f => f.id === currentTaskForPause.followupId) 
+                : task;
+            
+            // Update status based on active agents
+            const activeAgents = targetTask.agents.filter(a => a.active);
+            if (activeAgents.length === 0) {
+                targetTask.status = 'stopped';
+            } else {
+                targetTask.status = 'in-progress';
+            }
+            
+            closePauseModal();
+            renderTasks();
+        }
+
+        function addFollowupTask(taskId) {
+            const title = prompt("Enter followup task title:");
+            if (!title) return;
+            
+            const task = tasks.find(t => t.id === taskId);
+            const newFollowup = {
+                id: Date.now(),
+                title: title,
+                status: 'in-progress',
+                agents: [
+                    { id: 1, name: "Agent 1", active: true },
+                    { id: 2, name: "Agent 2", active: true }
+                ]
+            };
+            
+            task.followups.push(newFollowup);
+            renderTasks();
+        }
+
+        function addMainTask() {
+            const title = prompt("Enter main task title:");
+            if (!title) return;
+            
+            const newTask = {
+                id: Date.now(),
+                title: title,
+                status: 'in-progress',
+                agents: [
+                    { id: 1, name: "Agent 1", active: true },
+                    { id: 2, name: "Agent 2", active: true }
+                ],
+                followups: []
+            };
+            
+            tasks.push(newTask);
+            renderTasks();
+        }
+
+        // Initial render
+        renderTasks();
+    </script>
+</body>
+</html>
