@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Blue Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .button-container {
+            text-align: center;
+        }
+        
+        .blue-button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .blue-button:hover {
+            background-color: #0052a3;
+        }
+        
+        .blue-button:active {
+            background-color: #003d7a;
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+        <button class="blue-button" onclick="console.log('hello')">
+            Click Me
+        </button>
+        <p style="color: #666; margin-top: 20px;">
+            Open your browser's console (F12) to see the message
+        </p>
+    </div>
+</body>
+</html>
