@@ -40,22 +40,54 @@
         }
         
         .blue-button {
-            background-color: #007bff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 28px;
             font-size: 16px;
-            border-radius: 4px;
+            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .blue-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
         
         .blue-button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        .blue-button:hover::before {
+            width: 300px;
+            height: 300px;
         }
         
         .blue-button:active {
-            background-color: #004085;
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+        
+        .blue-button span {
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
@@ -64,23 +96,36 @@
     <div class="agents-container">
         <div class="agent">
             <h2>Agent 1</h2>
-            <button class="blue-button" onclick="console.log('hello')">Click Me</button>
+            <button class="blue-button" data-agent="1"><span>Click Me</span></button>
         </div>
         
         <div class="agent">
             <h2>Agent 2</h2>
-            <button class="blue-button" onclick="console.log('hello')">Click Me</button>
+            <button class="blue-button" data-agent="2"><span>Click Me</span></button>
         </div>
         
         <div class="agent">
             <h2>Agent 3</h2>
-            <button class="blue-button" onclick="console.log('hello')">Click Me</button>
+            <button class="blue-button" data-agent="3"><span>Click Me</span></button>
         </div>
         
         <div class="agent">
             <h2>Agent 4</h2>
-            <button class="blue-button" onclick="console.log('hello')">Click Me</button>
+            <button class="blue-button" data-agent="4"><span>Click Me</span></button>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.blue-button');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const agentNumber = this.getAttribute('data-agent');
+                    console.log(`Agent ${agentNumber} button clicked`);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
