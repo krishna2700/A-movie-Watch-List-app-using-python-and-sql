@@ -1,86 +1,93 @@
+from flask import Flask, render_template, request, jsonify
 import datetime
 import database
 
-menu = """Please select one of the following options:
-1) Add new movie.
-2) View upcoming movies.
-3) View all movies
-4) Add watched movie
-5) View watched movies.
-6) Add user to the app.
-7) Search for a movie.
-8) Exit.
+app = Flask(__name__)
 
-Your selection: """
-welcome = "Welcome to the watchlist app!"
+database.create_tables()
 
 
-def prompt_add_movie():
-    title = input("Movie title: ")
-    release_date = input(
-        "Release date (dd-mm-YYYY): "
-    ) or datetime.datetime.today().strftime("%d-%m-%Y")
-    release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
-    database.add_movie(title, release_timestamp)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
-def print_movie_list(heading, movies):
-    print(f"-- {heading} movies --")
+@app.route('/api/movies', methods=['GET'])
+def get_movies():
+    upcoming = request.args.get('upcoming', 'false').lower() == 'true'
+    movies = database.get_movies(upcoming=upcoming)
+    movie_list = []
     for movie in movies:
         movie_date = datetime.datetime.fromtimestamp(movie[2])
         human_date = movie_date.strftime("%b %d %Y")
-        print(f"{movie[0]}: {movie[1]} (on {human_date})")
-    print("---- \n")
+        movie_list.append({
+            'id': movie[0],
+            'title': movie[1],
+            'release_date': human_date,
+            'timestamp': movie[2]
+        })
+    return jsonify(movie_list)
 
 
-def prompt_watch_movie():
-    username = input("Username: ")
-    movie_id = input("Movie ID: ")
-    database.watch_movie(username, movie_id)
+@app.route('/api/movies', methods=['POST'])
+def add_movie():
+    data = request.json
+    title = data.get('title')
+    release_date = data.get('release_date') or datetime.datetime.today().strftime("%d-%m-%Y")
+    release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
+    database.add_movie(title, release_timestamp)
+    return jsonify({'status': 'success'})
 
 
-def prompt_get_watched_movies():
-    username = input("Username: ")
-    return database.get_watched_movies(username)
-
-
-def prompt_add_user():
-    username = input("Username: ")
+@app.route('/api/users', methods=['POST'])
+def add_user():
+    data = request.json
+    username = data.get('username')
     database.add_user(username)
+    return jsonify({'status': 'success'})
 
 
-def prompt_search_movies():
-    search_term = input("Enter partial movie title: ")
-    return database.search_movies(search_term)
+@app.route('/api/watched', methods=['POST'])
+def watch_movie():
+    data = request.json
+    username = data.get('username')
+    movie_id = data.get('movie_id')
+    database.watch_movie(username, movie_id)
+    return jsonify({'status': 'success'})
 
 
-print(welcome)
-database.create_tables()
+@app.route('/api/watched/<username>', methods=['GET'])
+def get_watched_movies(username):
+    movies = database.get_watched_movies(username)
+    movie_list = []
+    for movie in movies:
+        movie_date = datetime.datetime.fromtimestamp(movie[2])
+        human_date = movie_date.strftime("%b %d %Y")
+        movie_list.append({
+            'id': movie[0],
+            'title': movie[1],
+            'release_date': human_date,
+            'timestamp': movie[2]
+        })
+    return jsonify(movie_list)
 
-while (user_input := input(menu)) != "8":
-    if user_input == "1":
-        prompt_add_movie()
-    elif user_input == "2":
-        movies = database.get_movies(upcoming=True)
-        print_movie_list("Upcoming", movies)
-    elif user_input == "3":
-        movies = database.get_movies()
-        print_movie_list("All", movies)
-    elif user_input == "4":
-        prompt_watch_movie()
-    elif user_input == "5":
-        movies = prompt_get_watched_movies()
-        if movies:
-            print_movie_list("Watched", movies)
-        else:
-            print("That user has watched no movies yet!")
-    elif user_input == "6":
-        prompt_add_user()
-    elif user_input == "7":
-        movies = prompt_search_movies()
-        if movies:
-            print_movie_list("Movies found", movies)
-        else:
-            print("Found no movies for that search term!")
-    else:
-        print("Invalid input, please try again!")
+
+@app.route('/api/movies/search', methods=['GET'])
+def search_movies():
+    search_term = request.args.get('q', '')
+    movies = database.search_movies(search_term)
+    movie_list = []
+    for movie in movies:
+        movie_date = datetime.datetime.fromtimestamp(movie[2])
+        human_date = movie_date.strftime("%b %d %Y")
+        movie_list.append({
+            'id': movie[0],
+            'title': movie[1],
+            'release_date': human_date,
+            'timestamp': movie[2]
+        })
+    return jsonify(movie_list)
+
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

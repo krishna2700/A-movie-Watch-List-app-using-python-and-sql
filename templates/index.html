@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Watchlist - Multiagent</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Watchlist App!</h1>
+        
+        <div class="multiagent-section">
+            <button class="multiagent-button">Multiagent</button>
+        </div>
+
+        <div class="section">
+            <h2>Add New Movie</h2>
+            <form id="addMovieForm">
+                <input type="text" id="movieTitle" placeholder="Movie title" required>
+                <input type="text" id="releaseDate" placeholder="Release date (dd-mm-YYYY)">
+                <button type="submit">Add Movie</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>View Movies</h2>
+            <button onclick="loadMovies(false)">View All Movies</button>
+            <button onclick="loadMovies(true)">View Upcoming Movies</button>
+            <div id="movieList"></div>
+        </div>
+
+        <div class="section">
+            <h2>Add User</h2>
+            <form id="addUserForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <button type="submit">Add User</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>Mark Movie as Watched</h2>
+            <form id="watchMovieForm">
+                <input type="text" id="watchUsername" placeholder="Username" required>
+                <input type="number" id="watchMovieId" placeholder="Movie ID" required>
+                <button type="submit">Mark as Watched</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h2>View Watched Movies</h2>
+            <form id="viewWatchedForm">
+                <input type="text" id="viewWatchedUsername" placeholder="Username" required>
+                <button type="submit">View Watched</button>
+            </form>
+            <div id="watchedList"></div>
+        </div>
+
+        <div class="section">
+            <h2>Search Movies</h2>
+            <form id="searchForm">
+                <input type="text" id="searchTerm" placeholder="Enter partial movie title" required>
+                <button type="submit">Search</button>
+            </form>
+            <div id="searchResults"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('addMovieForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('movieTitle').value;
+            const releaseDate = document.getElementById('releaseDate').value;
+            
+            const response = await fetch('/api/movies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, release_date: releaseDate })
+            });
+            
+            if (response.ok) {
+                alert('Movie added successfully!');
+                document.getElementById('addMovieForm').reset();
+            }
+        });
+
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+            
+            if (response.ok) {
+                alert('User added successfully!');
+                document.getElementById('addUserForm').reset();
+            }
+        });
+
+        document.getElementById('watchMovieForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('watchUsername').value;
+            const movie_id = document.getElementById('watchMovieId').value;
+            
+            const response = await fetch('/api/watched', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, movie_id })
+            });
+            
+            if (response.ok) {
+                alert('Movie marked as watched!');
+                document.getElementById('watchMovieForm').reset();
+            }
+        });
+
+        document.getElementById('viewWatchedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('viewWatchedUsername').value;
+            
+            const response = await fetch(`/api/watched/${username}`);
+            const movies = await response.json();
+            
+            displayMovies(movies, 'watchedList', 'Watched');
+        });
+
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const searchTerm = document.getElementById('searchTerm').value;
+            
+            const response = await fetch(`/api/movies/search?q=${encodeURIComponent(searchTerm)}`);
+            const movies = await response.json();
+            
+            displayMovies(movies, 'searchResults', 'Search Results');
+        });
+
+        async function loadMovies(upcoming) {
+            const response = await fetch(`/api/movies?upcoming=${upcoming}`);
+            const movies = await response.json();
+            
+            displayMovies(movies, 'movieList', upcoming ? 'Upcoming' : 'All');
+        }
+
+        function displayMovies(movies, elementId, heading) {
+            const element = document.getElementById(elementId);
+            
+            if (movies.length === 0) {
+                element.innerHTML = `<p>No ${heading.toLowerCase()} movies found.</p>`;
+                return;
+            }
+            
+            let html = `<h3>${heading} Movies</h3><ul>`;
+            movies.forEach(movie => {
+                html += `<li>${movie.id}: ${movie.title} (on ${movie.release_date})</li>`;
+            });
+            html += '</ul>';
+            
+            element.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
