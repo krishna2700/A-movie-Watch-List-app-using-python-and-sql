@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pink Button</title>
+    <style>
+        button {
+            background-color: pink;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #ffb6c1;
+        }
+    </style>
+</head>
+<body>
+    <button id="pinkBtn">Pink Button</button>
+    <script>
+        document.getElementById('pinkBtn').addEventListener('click', function() {
+            console.log('pink');
+        });
+    </script>
+</body>
+</html>
