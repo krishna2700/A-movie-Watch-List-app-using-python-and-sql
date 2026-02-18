@@ -1,7 +1,10 @@
 import datetime
 import database
 
-menu = """Please select one of the following options:
+BLUE = "\033[94m"
+RESET = "\033[0m"
+
+menu = f"""Please select one of the following options:
 1) Add new movie.
 2) View upcoming movies.
 3) View all movies
@@ -9,6 +12,7 @@ menu = """Please select one of the following options:
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
+{BLUE}9) Multi Agent{RESET}
 8) Exit.
 
 Your selection: """
@@ -82,5 +86,7 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "9":
+        print(f"{BLUE}[Multi Agent] No action assigned.{RESET}")
     else:
         print("Invalid input, please try again!")
