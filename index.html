@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .reset-button {
+            background-color: pink;
+            color: #333;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .reset-button:hover {
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .reset-button:active {
+            transform: translateY(2px);
+        }
+    </style>
+</head>
+<body>
+    <button class="reset-button" onclick="changeToWhite(this)">Reset</button>
+
+    <script>
+        function changeToWhite(button) {
+            button.style.backgroundColor = 'white';
+        }
+    </script>
+</body>
+</html>
