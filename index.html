@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Blue Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .blue-button {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .blue-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 60, 114, 0.6);
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 50%, #667eea 100%);
+        }
+
+        .blue-button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(30, 60, 114, 0.4);
+        }
+
+        .agent-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .agent {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-left: 4px solid #2a5298;
+            text-align: left;
+        }
+
+        .agent-name {
+            font-weight: bold;
+            color: #1e3c72;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Agent Blue Button</h1>
+        <button class="blue-button" id="mainButton">Click Me</button>
+        
+        <div class="agent-info">
+            <h3>Active Agents:</h3>
+            <div class="agent">
+                <span class="agent-name">Agent 1 (Logger):</span> Logs to console
+            </div>
+            <div class="agent">
+                <span class="agent-name">Agent 2 (Counter):</span> Tracks clicks
+            </div>
+            <div class="agent">
+                <span class="agent-name">Agent 3 (Notifier):</span> Shows alerts
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Multi-agent system for button click handling
+        
+        // Agent 1: Logger Agent - Logs "hello" to console
+        class LoggerAgent {
+            constructor() {
+                this.name = 'LoggerAgent';
+            }
+            
+            execute() {
+                console.log('hello');
+                console.log(`[${this.name}] Message logged successfully`);
+            }
+        }
+
+        // Agent 2: Counter Agent - Tracks number of clicks
+        class CounterAgent {
+            constructor() {
+                this.name = 'CounterAgent';
+                this.clickCount = 0;
+            }
+            
+            execute() {
+                this.clickCount++;
+                console.log(`[${this.name}] Total clicks: ${this.clickCount}`);
+            }
+        }
+
+        // Agent 3: Notifier Agent - Provides user feedback
+        class NotifierAgent {
+            constructor() {
+                this.name = 'NotifierAgent';
+            }
+            
+            execute() {
+                const messages = [
+                    'Hello from the multi-agent system!',
+                    'All agents activated successfully!',
+                    'Button click processed!',
+                    'Agents working in harmony!'
+                ];
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                console.log(`[${this.name}] ${randomMessage}`);
+            }
+        }
+
+        // Agent Coordinator - Manages all agents
+        class AgentCoordinator {
+            constructor() {
+                this.agents = [];
+            }
+            
+            registerAgent(agent) {
+                this.agents.push(agent);
+                console.log(`Agent registered: ${agent.name}`);
+            }
+            
+            executeAll() {
+                console.log('=== Multi-Agent System Activated ===');
+                this.agents.forEach(agent => {
+                    agent.execute();
+                });
+                console.log('=== All Agents Completed ===');
+            }
+        }
+
+        // Initialize the multi-agent system
+        const coordinator = new AgentCoordinator();
+        
+        // Create and register agents
+        const loggerAgent = new LoggerAgent();
+        const counterAgent = new CounterAgent();
+        const notifierAgent = new NotifierAgent();
+        
+        coordinator.registerAgent(loggerAgent);
+        coordinator.registerAgent(counterAgent);
+        coordinator.registerAgent(notifierAgent);
+
+        // Attach click handler to the blue button
+        document.getElementById('mainButton').addEventListener('click', function() {
+            coordinator.executeAll();
+        });
+
+        console.log('Multi-agent blue button system initialized!');
+        console.log('Click the blue button to activate all agents.');
+    </script>
+</body>
+</html>
