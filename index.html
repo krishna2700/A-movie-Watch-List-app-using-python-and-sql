@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Blue Button</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Agent System</h1>
+        
+        <div class="agents-container">
+            <div class="agent" id="agent1">
+                <h2>Agent 1</h2>
+                <p>Status: <span class="status">Ready</span></p>
+            </div>
+            
+            <div class="agent" id="agent2">
+                <h2>Agent 2</h2>
+                <p>Status: <span class="status">Ready</span></p>
+            </div>
+            
+            <div class="agent" id="agent3">
+                <h2>Agent 3</h2>
+                <p>Status: <span class="status">Ready</span></p>
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <button id="blueButton" class="blue-button" onclick="handleClick()">
+                Click Me
+            </button>
+        </div>
+    </div>
+    
+    <script src="agents.js"></script>
+</body>
+</html>
