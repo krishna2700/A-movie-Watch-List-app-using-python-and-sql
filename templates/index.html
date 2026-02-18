@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Agent Task Manager</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Multi-Agent Task Manager</h1>
+        
+        <div class="task-controls">
+            <h2>Create New Task</h2>
+            <form id="createTaskForm" class="inline-form">
+                <div class="form-group">
+                    <label for="taskTitle">Task Title</label>
+                    <input type="text" id="taskTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <input type="text" id="taskDescription" name="description">
+                </div>
+                <div class="form-group">
+                    <label for="parentTask">Parent Task (for followup)</label>
+                    <select id="parentTask" name="parent_task_id">
+                        <option value="">None (Main Task)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="task-list" id="taskList">
+            <!-- Tasks will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script>
+        let tasks = [];
+        let allAgents = [];
+
+        // Load tasks on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            loadParentTaskOptions();
+        });
+
+        // Create task form submission
+        document.getElementById('createTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                title: formData.get('title'),
+                description: formData.get('description') || '',
+                parent_task_id: formData.get('parent_task_id') || null
+            };
+
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    e.target.reset();
+                    loadTasks();
+                    loadParentTaskOptions();
+                    alert('Task created successfully!');
+                }
+            } catch (error) {
+                console.error('Error creating task:', error);
+                alert('Failed to create task');
+            }
+        });
+
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/tasks');
+                tasks = await response.json();
+                renderTasks();
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+
+        async function loadParentTaskOptions() {
+            try {
+                const response = await fetch('/api/tasks?main_only=true');
+                const mainTasks = await response.json();
+                const select = document.getElementById('parentTask');
+                
+                // Clear existing options except first
+                select.innerHTML = '<option value="">None (Main Task)</option>';
+                
+                mainTasks.forEach(task => {
+                    const option = document.createElement('option');
+                    option.value = task.task_id;
+                    option.textContent = `#${task.task_id} - ${task.title}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading parent tasks:', error);
+            }
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('taskList');
+            
+            if (tasks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No tasks yet</h3>
+                        <p>Create your first task above to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            
+            // Group tasks by parent
+            const mainTasks = tasks.filter(t => !t.is_followup);
+            const followupsByParent = {};
+            
+            tasks.filter(t => t.is_followup).forEach(task => {
+                if (!followupsByParent[task.parent_task_id]) {
+                    followupsByParent[task.parent_task_id] = [];
+                }
+                followupsByParent[task.parent_task_id].push(task);
+            });
+
+            // Render main tasks and their followups
+            mainTasks.forEach(task => {
+                container.appendChild(createTaskElement(task));
+                
+                // Render followup tasks
+                const followups = followupsByParent[task.task_id] || [];
+                followups.forEach(followup => {
+                    container.appendChild(createTaskElement(followup, true));
+                });
+            });
+        }
+
+        function createTaskElement(task, isFollowup = false) {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = `task-item ${isFollowup ? 'followup' : ''}`;
+            taskDiv.id = `task-${task.task_id}`;
+
+            const statusClass = task.status.toLowerCase();
+            const statusLabel = getStatusLabel(task);
+            const agentIcons = createAgentIcons(task);
+
+            taskDiv.innerHTML = `
+                <div class="task-header">
+                    <div class="task-info">
+                        <div class="task-title">
+                            ${isFollowup ? '└─ ' : ''}Task #${task.task_id}: ${task.title}
+                        </div>
+                        <div class="task-meta">
+                            <span class="task-status ${statusClass}">
+                                <span class="status-icon">${getStatusIcon(task.status)}</span>
+                                ${statusLabel}
+                            </span>
+                            <div class="agent-icons" id="agent-icons-${task.task_id}">
+                                ${agentIcons}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        ${createTaskActions(task)}
+                    </div>
+                </div>
+                ${task.agents && task.agents.length > 0 ? createAgentsSection(task) : ''}
+            `;
+
+            return taskDiv;
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                'pending': '⏳',
+                'in_progress': '▶️',
+                'completed': '✅',
+                'stopped': '⏸️'
+            };
+            return icons[status] || '❓';
+        }
+
+        function getStatusLabel(task) {
+            if (task.status === 'completed') {
+                return 'Completed';
+            } else if (task.status === 'stopped') {
+                const stoppedCount = task.agents.filter(a => a.status === 'stopped').length;
+                return `Stopped (${stoppedCount} agent${stoppedCount > 1 ? 's' : ''})`;
+            } else if (task.status === 'in_progress') {
+                const runningAgents = task.agents.filter(a => a.status === 'running');
+                if (runningAgents.length > 0) {
+                    const names = runningAgents.map(a => a.name).join(', ');
+                    return `In Progress (${names})`;
+                }
+                return 'In Progress';
+            } else {
+                return 'Pending';
+            }
+        }
+
+        function createAgentIcons(task) {
+            if (!task.agent_icons_display || task.agent_icons_display.length === 0) {
+                return '';
+            }
+
+            return task.agent_icons_display.map(agent => `
+                <div class="agent-icon ${agent.status}">
+                    ${agent.icon}
+                    <div class="agent-tooltip">${agent.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function createTaskActions(task) {
+            let actions = '';
+
+            if (task.status === 'pending') {
+                actions += `
+                    <button class="btn btn-success btn-sm" onclick="showStartTaskModal(${task.task_id})">
+                        Start Task
+                    </button>
+                `;
+            } else if (task.status === 'in_progress') {
+                actions += `
+                    <button class="btn btn-warning btn-sm" onclick="showPauseModal(${task.task_id})">
+                        ⏸️ Pause
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="completeTask(${task.task_id})">
+                        ✅ Complete
+                    </button>
+                `;
+            } else if (task.status === 'stopped') {
+                actions += `
+                    <button class="btn btn-primary btn-sm" onclick="showResumeModal(${task.task_id})">
+                        ▶️ Resume
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="completeTask(${task.task_id})">
+                        ✅ Complete
+                    </button>
+                `;
+            }
+
+            return actions;
+        }
+
+        function createAgentsSection(task) {
+            if (!task.agents || task.agents.length === 0) return '';
+
+            const agentCards = task.agents.map(agent => `
+                <div class="agent-card">
+                    <span>${agent.icon}</span>
+                    <span class="agent-name">${agent.name}</span>
+                    <span class="agent-status-badge ${agent.status}">${agent.status}</span>
+                </div>
+            `).join('');
+
+            return `
+                <div class="agents-section">
+                    <div class="agents-list">
+                        ${agentCards}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function showStartTaskModal(taskId) {
+            const agentNames = prompt('Enter agent names (comma-separated):');
+            if (!agentNames) return;
+
+            const agents = agentNames.split(',').map(n => n.trim()).filter(n => n);
+            
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_names: agents })
+                });
+
+                if (response.ok) {
+                    loadTasks();
+                    alert('Task started successfully!');
+                }
+            } catch (error) {
+                console.error('Error starting task:', error);
+                alert('Failed to start task');
+            }
+        }
+
+        async function showPauseModal(taskId) {
+            const task = tasks.find(t => t.task_id === taskId);
+            if (!task || !task.agents) return;
+
+            const runningAgents = task.agents.filter(a => a.status === 'running');
+            
+            if (runningAgents.length === 0) {
+                alert('No running agents to pause');
+                return;
+            }
+
+            // Ask if user wants to pause all or select specific agents
+            const pauseAll = confirm('Pause all agents? Click Cancel to select specific agents.');
+
+            let agentIds = null;
+            if (!pauseAll) {
+                const agentList = runningAgents.map(a => `${a.id}: ${a.name}`).join('\n');
+                const selected = prompt(`Enter agent IDs to pause (comma-separated):\n${agentList}`);
+                if (!selected) return;
+                agentIds = selected.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+            }
+
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/pause`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_ids: agentIds })
+                });
+
+                if (response.ok) {
+                    loadTasks();
+                    alert('Agents paused successfully!');
+                }
+            } catch (error) {
+                console.error('Error pausing agents:', error);
+                alert('Failed to pause agents');
+            }
+        }
+
+        async function showResumeModal(taskId) {
+            const task = tasks.find(t => t.task_id === taskId);
+            if (!task || !task.agents) return;
+
+            const stoppedAgents = task.agents.filter(a => a.status === 'stopped');
+            
+            if (stoppedAgents.length === 0) {
+                alert('No stopped agents to resume');
+                return;
+            }
+
+            const agentList = stoppedAgents.map(a => `${a.id}: ${a.name}`).join('\n');
+            const selected = prompt(`Enter agent IDs to resume (comma-separated):\n${agentList}`);
+            if (!selected) return;
+            
+            const agentIds = selected.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/resume`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_ids: agentIds })
+                });
+
+                if (response.ok) {
+                    loadTasks();
+                    alert('Agents resumed successfully!');
+                }
+            } catch (error) {
+                console.error('Error resuming agents:', error);
+                alert('Failed to resume agents');
+            }
+        }
+
+        async function completeTask(taskId) {
+            if (!confirm('Are you sure you want to mark this task as completed?')) return;
+
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/complete`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    loadTasks();
+                    alert('Task completed successfully!');
+                }
+            } catch (error) {
+                console.error('Error completing task:', error);
+                alert('Failed to complete task');
+            }
+        }
+
+        // Refresh tasks every 5 seconds
+        setInterval(loadTasks, 5000);
+    </script>
+</body>
+</html>
