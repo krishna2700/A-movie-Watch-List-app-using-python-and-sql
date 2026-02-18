@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pink Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        
+        .pink-button {
+            background-color: pink;
+            color: #333;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .pink-button:hover {
+            background-color: #ffb3d9;
+        }
+        
+        .pink-button:active {
+            background-color: #ff99cc;
+        }
+    </style>
+</head>
+<body>
+    <button class="pink-button" onclick="handleClick()">Pink Button</button>
+    
+    <script>
+        function handleClick() {
+            console.log('pink');
+        }
+    </script>
+</body>
+</html>
