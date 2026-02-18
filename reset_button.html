@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #resetButton {
+            background-color: pink;
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #resetButton:hover {
+            opacity: 0.9;
+        }
+
+        #resetButton.clicked {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <button id="resetButton">Reset</button>
+
+    <script>
+        const resetButton = document.getElementById('resetButton');
+
+        resetButton.addEventListener('click', function() {
+            this.classList.add('clicked');
+            this.style.backgroundColor = 'white';
+        });
+    </script>
+</body>
+</html>
