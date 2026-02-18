@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .reset-btn {
+            padding: 14px 48px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border: 2px solid #ff69b4;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #ff69b4;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            opacity: 0.85;
+        }
+
+        .reset-btn.clicked {
+            background-color: #ffffff;
+            color: #333;
+            border-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <button class="reset-btn" onclick="this.classList.toggle('clicked')">Reset</button>
+</body>
+</html>
