@@ -20,8 +20,9 @@ def prompt_add_movie():
     release_date = input(
         "Release date (dd-mm-YYYY): "
     ) or datetime.datetime.today().strftime("%d-%m-%Y")
+    poster_path = input("Poster image path or URL (optional): ").strip() or None
     release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
-    database.add_movie(title, release_timestamp)
+    database.add_movie(title, release_timestamp, poster_path)
 
 
 def print_movie_list(heading, movies):
@@ -29,7 +30,10 @@ def print_movie_list(heading, movies):
     for movie in movies:
         movie_date = datetime.datetime.fromtimestamp(movie[2])
         human_date = movie_date.strftime("%b %d %Y")
+        poster_path = movie[3] if len(movie) > 3 else None
+        poster_label = poster_path or "(none)"
         print(f"{movie[0]}: {movie[1]} (on {human_date})")
+        print(f"    Poster: {poster_label}")
     print("---- \n")
 
 

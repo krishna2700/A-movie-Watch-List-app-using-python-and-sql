@@ -4,7 +4,8 @@ import sqlite3
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY,
     title TEXT,
-    release_timestamp REAL
+    release_timestamp REAL,
+    poster_path TEXT
 );"""
 
 CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
@@ -18,7 +19,7 @@ CREATE_WATCHED_TABLE = """CREATE TABLE IF NOT EXISTS watched (
     FOREIGN KEY(movie_id) REFERENCES movies(id)
 );"""
 
-INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp) VALUES (?, ?)"
+INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp, poster_path) VALUES (?, ?, ?)"
 SELECT_ALL_MOVIES = "SELECT * FROM movies;"
 SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > ?;"
 INSERT_USER = "INSERT INTO users (username) VALUES (?)"
@@ -40,11 +41,19 @@ def create_tables():
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
+        ensure_movies_schema()
 
 
-def add_movie(title, release_timestamp):
+def ensure_movies_schema():
+    cursor = connection.execute("PRAGMA table_info(movies);")
+    columns = {row[1] for row in cursor.fetchall()}
+    if "poster_path" not in columns:
+        connection.execute("ALTER TABLE movies ADD COLUMN poster_path TEXT;")
+
+
+def add_movie(title, release_timestamp, poster_path=None):
     with connection:
-        connection.execute(INSERT_MOVIE, (title, release_timestamp))
+        connection.execute(INSERT_MOVIE, (title, release_timestamp, poster_path))
 
 
 def get_movies(upcoming=False):
