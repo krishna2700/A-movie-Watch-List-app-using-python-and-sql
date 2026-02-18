@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Watchlist - Multi Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .blue-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .blue-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .blue-button:active {
+            transform: translateY(0);
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .movie-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .movie-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .movie-card h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .movie-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .console-output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .console-line {
+            margin-bottom: 5px;
+        }
+
+        .agent-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .agent-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            text-align: center;
+        }
+
+        .agent-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .agent-button:active {
+            transform: translateY(0);
+        }
+
+        .agent-button.agent-1 {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .agent-button.agent-2 {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .agent-button.agent-3 {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+
+        .agent-button.agent-4 {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Watchlist - Multi Agent System</h1>
+        
+        <div class="section">
+            <h2>Multi-Agent Control Panel</h2>
+            <div class="agent-buttons">
+                <button class="agent-button agent-1" onclick="agentAction('Agent 1')">
+                    Agent 1: Movie Fetcher
+                </button>
+                <button class="agent-button agent-2" onclick="agentAction('Agent 2')">
+                    Agent 2: User Manager
+                </button>
+                <button class="agent-button agent-3" onclick="agentAction('Agent 3')">
+                    Agent 3: Search Engine
+                </button>
+                <button class="agent-button agent-4" onclick="agentAction('Agent 4')">
+                    Agent 4: Analytics
+                </button>
+            </div>
+            <div class="button-container">
+                <button class="blue-button" onclick="console.log('hello')">
+                    Click Me - Console Hello
+                </button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Add New Movie</h2>
+            <div class="input-group">
+                <label for="movieTitle">Movie Title</label>
+                <input type="text" id="movieTitle" placeholder="Enter movie title">
+            </div>
+            <div class="input-group">
+                <label for="releaseDate">Release Date (dd-mm-yyyy)</label>
+                <input type="text" id="releaseDate" placeholder="18-02-2024">
+            </div>
+            <button class="blue-button" onclick="addMovie()">Add Movie</button>
+        </div>
+
+        <div class="section">
+            <h2>Add User</h2>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username">
+            </div>
+            <button class="blue-button" onclick="addUser()">Add User</button>
+        </div>
+
+        <div class="section">
+            <h2>Movies</h2>
+            <div class="button-container">
+                <button class="blue-button" onclick="loadMovies(false)">View All Movies</button>
+                <button class="blue-button" onclick="loadMovies(true)">View Upcoming Movies</button>
+            </div>
+            <div class="movie-list" id="movieList"></div>
+        </div>
+
+        <div class="section">
+            <h2>Search Movies</h2>
+            <div class="input-group">
+                <label for="searchTerm">Search Term</label>
+                <input type="text" id="searchTerm" placeholder="Enter movie title">
+            </div>
+            <button class="blue-button" onclick="searchMovies()">Search</button>
+            <div class="movie-list" id="searchResults"></div>
+        </div>
+
+        <div class="section">
+            <h2>Console Output</h2>
+            <div class="console-output" id="consoleOutput">
+                <div class="console-line">> Multi-Agent System Ready</div>
+                <div class="console-line">> Click the blue button to see console output</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Override console.log to display in our custom console
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const consoleOutput = document.getElementById('consoleOutput');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.textContent = '> ' + args.join(' ');
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        function agentAction(agentName) {
+            console.log(`${agentName} activated`);
+            console.log('hello');
+        }
+
+        async function addMovie() {
+            const title = document.getElementById('movieTitle').value;
+            const releaseDate = document.getElementById('releaseDate').value;
+            
+            if (!title) {
+                console.log('Error: Movie title is required');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/movies', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ title, release_date: releaseDate })
+                });
+                
+                const data = await response.json();
+                console.log(`Movie "${title}" added successfully`);
+                document.getElementById('movieTitle').value = '';
+                document.getElementById('releaseDate').value = '';
+                loadMovies(false);
+            } catch (error) {
+                console.log('Error adding movie: ' + error.message);
+            }
+        }
+
+        async function addUser() {
+            const username = document.getElementById('username').value;
+            
+            if (!username) {
+                console.log('Error: Username is required');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username })
+                });
+                
+                const data = await response.json();
+                console.log(`User "${username}" added successfully`);
+                document.getElementById('username').value = '';
+            } catch (error) {
+                console.log('Error adding user: ' + error.message);
+            }
+        }
+
+        async function loadMovies(upcoming) {
+            try {
+                const response = await fetch(`/api/movies?upcoming=${upcoming}`);
+                const movies = await response.json();
+                
+                const movieList = document.getElementById('movieList');
+                movieList.innerHTML = '';
+                
+                if (movies.length === 0) {
+                    movieList.innerHTML = '<p>No movies found</p>';
+                    console.log('No movies found');
+                    return;
+                }
+                
+                movies.forEach(movie => {
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    card.innerHTML = `
+                        <h3>${movie.title}</h3>
+                        <p>ID: ${movie.id}</p>
+                        <p>Release: ${movie.release_date}</p>
+                    `;
+                    movieList.appendChild(card);
+                });
+                
+                console.log(`Loaded ${movies.length} ${upcoming ? 'upcoming' : 'all'} movies`);
+            } catch (error) {
+                console.log('Error loading movies: ' + error.message);
+            }
+        }
+
+        async function searchMovies() {
+            const searchTerm = document.getElementById('searchTerm').value;
+            
+            if (!searchTerm) {
+                console.log('Error: Search term is required');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(searchTerm)}`);
+                const movies = await response.json();
+                
+                const searchResults = document.getElementById('searchResults');
+                searchResults.innerHTML = '';
+                
+                if (movies.length === 0) {
+                    searchResults.innerHTML = '<p>No movies found</p>';
+                    console.log(`No movies found for "${searchTerm}"`);
+                    return;
+                }
+                
+                movies.forEach(movie => {
+                    const card = document.createElement('div');
+                    card.className = 'movie-card';
+                    card.innerHTML = `
+                        <h3>${movie.title}</h3>
+                        <p>ID: ${movie.id}</p>
+                        <p>Release: ${movie.release_date}</p>
+                    `;
+                    searchResults.appendChild(card);
+                });
+                
+                console.log(`Found ${movies.length} movies for "${searchTerm}"`);
+            } catch (error) {
+                console.log('Error searching movies: ' + error.message);
+            }
+        }
+
+        // Load all movies on page load
+        window.addEventListener('load', () => {
+            loadMovies(false);
+        });
+    </script>
+</body>
+</html>
