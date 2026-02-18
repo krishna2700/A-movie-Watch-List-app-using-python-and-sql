@@ -9,7 +9,12 @@ menu = """Please select one of the following options:
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
-8) Exit.
+8) Add task.
+9) Add followup task.
+10) Pause task agents.
+11) Complete task.
+12) View tasks.
+13) Exit.
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
@@ -54,10 +59,55 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
+def _prompt_agent_names():
+    raw_names = input("Agent names (comma separated): ")
+    return [name.strip() for name in raw_names.split(",") if name.strip()]
+
+
+def prompt_add_task():
+    title = input("Task title: ")
+    agent_names = _prompt_agent_names()
+    database.add_task(title, agent_names)
+
+
+def prompt_add_followup_task():
+    parent_task_id = int(input("Parent task ID: "))
+    title = input("Followup task title: ")
+    agent_names = _prompt_agent_names()
+    database.add_followup_task(title, agent_names, parent_task_id)
+
+
+def prompt_pause_agents():
+    task_id = int(input("Task ID: "))
+    agent_names = _prompt_agent_names()
+    for agent_name in agent_names:
+        database.set_agent_status(task_id, agent_name, "stopped")
+
+
+def prompt_complete_task():
+    task_id = int(input("Task ID: "))
+    database.complete_task(task_id)
+
+
+def print_tasks():
+    tasks = database.get_tasks_with_agents()
+    if not tasks:
+        print("No tasks found.")
+        return
+    for task in tasks:
+        followup_label = (
+            f" (followup of {task['followup_of']})" if task["followup_of"] else ""
+        )
+        print(f"Task {task['id']}{followup_label}: {task['title']} [{task['status']}]")
+        for agent_name, status in task["agents"]:
+            print(f"  - {agent_name}: {status}")
+    print("---- \n")
+
+
 print(welcome)
 database.create_tables()
 
-while (user_input := input(menu)) != "8":
+while (user_input := input(menu)) != "13":
     if user_input == "1":
         prompt_add_movie()
     elif user_input == "2":
@@ -82,5 +132,15 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "8":
+        prompt_add_task()
+    elif user_input == "9":
+        prompt_add_followup_task()
+    elif user_input == "10":
+        prompt_pause_agents()
+    elif user_input == "11":
+        prompt_complete_task()
+    elif user_input == "12":
+        print_tasks()
     else:
         print("Invalid input, please try again!")
