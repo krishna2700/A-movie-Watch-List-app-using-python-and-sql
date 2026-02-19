@@ -80,3 +80,10 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def clear_all_data():
+    with connection:
+        connection.execute("DELETE FROM watched;")
+        connection.execute("DELETE FROM movies;")
+        connection.execute("DELETE FROM users;")

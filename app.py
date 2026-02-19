@@ -10,6 +10,7 @@ menu = """Please select one of the following options:
 6) Add user to the app.
 7) Search for a movie.
 8) Exit.
+\033[91m9) 🔴 RED BUTTON - Clear all data\033[0m
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
@@ -54,6 +55,19 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
+def prompt_red_button():
+    print("\033[91m" + "="*50)
+    print("⚠️  RED BUTTON ACTIVATED ⚠️")
+    print("This will DELETE ALL data from the database!")
+    print("="*50 + "\033[0m")
+    confirmation = input("Type 'DELETE' to confirm: ")
+    if confirmation == "DELETE":
+        database.clear_all_data()
+        print("\033[91m✓ All data has been cleared!\033[0m")
+    else:
+        print("Operation cancelled.")
+
+
 print(welcome)
 database.create_tables()
 
@@ -82,5 +96,7 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "9":
+        prompt_red_button()
     else:
         print("Invalid input, please try again!")
