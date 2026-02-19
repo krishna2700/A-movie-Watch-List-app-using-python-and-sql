@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title or 'Movie Watchlist' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ page_title or 'Movie Watchlist' }}</h1>
+        
+        <nav>
+            <a href="/">All Movies</a>
+            <a href="/upcoming">Upcoming Movies</a>
+            <a href="/users">Users</a>
+        </nav>
+
+        <div class="add-movie-form">
+            <h2>Add New Movie</h2>
+            <form method="POST" action="/add_movie">
+                <input type="text" name="title" placeholder="Movie title" required>
+                <input type="date" name="release_date">
+                <button type="submit" class="red-button">Add Movie</button>
+            </form>
+        </div>
+
+        <div class="movies-list">
+            <h2>Movies</h2>
+            {% if movies %}
+                <ul>
+                {% for movie in movies %}
+                    <li>
+                        <strong>{{ movie[1] }}</strong> - 
+                        <span>{{ movie[2] | timestamp_to_date }}</span>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No movies found.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Movie Watchlist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>User Management</h1>
+        
+        <nav>
+            <a href="/">All Movies</a>
+            <a href="/upcoming">Upcoming Movies</a>
+            <a href="/users">Users</a>
+        </nav>
+
+        <div class="add-user-form">
+            <h2>Add New User</h2>
+            <form method="POST" action="/add_user">
+                <input type="text" name="username" placeholder="Username" required>
+                <button type="submit" class="red-button">Add User</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
