@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .blue-btn {
+            background-color: #2563eb;
+            color: #ffffff;
+            border: none;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .blue-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .blue-btn:active {
+            background-color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <button class="blue-btn" onclick="console.log('hello')">Click Me</button>
+</body>
+</html>
