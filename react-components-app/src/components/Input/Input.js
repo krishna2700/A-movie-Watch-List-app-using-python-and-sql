@@ -1,7 +1,7 @@
 import React from 'react';
 import './Input.css';
 
-const Input = ({ 
+const Input = ({
   type = 'text',
   label,
   placeholder,
@@ -11,10 +11,12 @@ const Input = ({
   disabled = false,
   required = false,
   name,
-  id
+  id,
+  helperText,
+  size = 'medium',
 }) => {
   const inputId = id || name;
-  
+
   return (
     <div className="input-wrapper">
       {label && (
@@ -27,7 +29,7 @@ const Input = ({
         type={type}
         id={inputId}
         name={name}
-        className={`input ${error ? 'input-error' : ''}`}
+        className={`input input-${size} ${error ? 'input-error' : ''}`}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -35,6 +37,7 @@ const Input = ({
         required={required}
       />
       {error && <span className="input-error-message">{error}</span>}
+      {helperText && !error && <span className="input-helper">{helperText}</span>}
     </div>
   );
 };

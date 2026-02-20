@@ -1,25 +1,36 @@
 import React from 'react';
 import './Button.css';
 
-const Button = ({ 
-  children, 
-  variant = 'primary', 
-  size = 'medium', 
-  onClick, 
+const Button = ({
+  children,
+  variant = 'primary',
+  size = 'medium',
+  onClick,
   disabled = false,
   type = 'button',
-  fullWidth = false 
+  fullWidth = false,
+  outline = false,
+  loading = false,
 }) => {
-  const className = `btn btn-${variant} btn-${size} ${fullWidth ? 'btn-full-width' : ''}`;
-  
+  const classes = [
+    'btn',
+    outline ? `btn-outline-${variant}` : `btn-${variant}`,
+    `btn-${size}`,
+    fullWidth ? 'btn-full-width' : '',
+    loading ? 'btn-loading' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <button 
-      className={className}
+    <button
+      className={classes}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       type={type}
     >
-      {children}
+      {loading && <span className="btn-spinner" />}
+      <span className={loading ? 'btn-text-loading' : ''}>{children}</span>
     </button>
   );
 };

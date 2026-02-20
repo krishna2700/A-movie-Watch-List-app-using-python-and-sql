@@ -1,0 +1,78 @@
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+}
+
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.breadcrumb-link {
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 4px 2px;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.breadcrumb-link:hover {
+  color: #4f46e5;
+  background-color: #eef2ff;
+  text-decoration: none;
+}
+
+.breadcrumb-link:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.breadcrumb-separator {
+  color: #d1d5db;
+  margin: 0 8px;
+  font-size: 13px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.breadcrumb-active {
+  color: #1f2937;
+  font-weight: 600;
+  cursor: default;
+}
+
+/* Sizes */
+.breadcrumb-small {
+  font-size: 12px;
+}
+
+.breadcrumb-small .breadcrumb-separator {
+  margin: 0 6px;
+  font-size: 11px;
+}
+
+.breadcrumb-medium {
+  font-size: 14px;
+}
+
+.breadcrumb-large {
+  font-size: 16px;
+}
+
+.breadcrumb-large .breadcrumb-separator {
+  margin: 0 10px;
+  font-size: 15px;
+}
