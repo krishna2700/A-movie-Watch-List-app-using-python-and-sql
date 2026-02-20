@@ -1,42 +1,42 @@
-# Movie Watch List App
+# मूवी वॉचलिस्ट ऐप
 
-A command-line movie watchlist application built with Python and SQLite. Track movies, manage users, and keep a record of what you've watched.
+यह एक कमांड-लाइन आधारित मूवी वॉचलिस्ट एप्लिकेशन है जो Python और SQLite पर बना है। इससे आप फिल्मों को ट्रैक कर सकते हैं, यूज़र्स मैनेज कर सकते हैं, और यह रिकॉर्ड रख सकते हैं कि आपने कौन-सी फिल्में देखीं।
 
-## Features
+## फीचर्स
 
-- **Add Movies** — Store movies with their release dates
-- **View Upcoming Movies** — See movies with future release dates
-- **View All Movies** — Browse the full movie catalog
-- **Mark Movies as Watched** — Track which movies each user has seen
-- **User Management** — Add users to the app
-- **Search** — Find movies by partial title match
+- **फिल्म जोड़ें** — रिलीज़ डेट के साथ नई फिल्म स्टोर करें
+- **आगामी फिल्में देखें** — भविष्य की रिलीज़ डेट वाली फिल्मों की सूची देखें
+- **सभी फिल्में देखें** — पूरी मूवी कैटलॉग ब्राउज़ करें
+- **देखी गई फिल्में मार्क करें** — किस यूज़र ने कौन-सी फिल्म देखी, ट्रैक करें
+- **यूज़र मैनेजमेंट** — नए यूज़र जोड़ें
+- **खोज** — आंशिक शीर्षक से फिल्म खोजें
 
-## Prerequisites
+## आवश्यकताएँ
 
-- Python 3.8+ (the walrus operator `:=` used in `app.py` requires 3.8 or later)
+- Python 3.8+ (क्योंकि `app.py` में `:=` ऑपरेटर का उपयोग है)
 
-No external dependencies are required. The app uses Python's built-in `sqlite3` module.
+कोई बाहरी डिपेंडेंसी नहीं चाहिए। ऐप Python के बिल्ट-इन `sqlite3` मॉड्यूल का उपयोग करता है।
 
-## Getting Started
+## शुरू करें
 
-1. **Clone the repository**
+1. **रिपॉजिटरी क्लोन करें**
 
    ```bash
    git clone <repository-url>
    cd A-movie-Watch-List-app-using-python-and-sql
    ```
 
-2. **Run the application**
+2. **ऐप चलाएँ**
 
    ```bash
    python3 app.py
    ```
 
-   The database file (`data.db`) is created automatically on first run.
+   पहली बार रन पर `data.db` फाइल अपने आप बन जाती है।
 
-## Usage
+## उपयोग
 
-When you start the app you are presented with an interactive menu:
+ऐप शुरू करने पर आपको यह इंटरैक्टिव मेन्यू दिखेगा:
 
 ```
 Please select one of the following options:
@@ -50,55 +50,55 @@ Please select one of the following options:
 8) Exit.
 ```
 
-| Option | Description |
-|--------|-------------|
-| **1** | Add a movie by entering its title and release date (`dd-mm-YYYY`). If no date is provided, today's date is used. |
-| **2** | List all movies whose release date is in the future. |
-| **3** | List every movie in the database. |
-| **4** | Mark a movie as watched by providing a username and movie ID. |
-| **5** | View all movies a specific user has watched. |
-| **6** | Register a new user by username. |
-| **7** | Search for movies by a partial title match. |
-| **8** | Exit the application. |
+| विकल्प | विवरण |
+|--------|-------|
+| **1** | फिल्म का शीर्षक और रिलीज़ डेट (`dd-mm-YYYY`) देकर नई फिल्म जोड़ें। अगर तारीख खाली है तो आज की तारीख ली जाएगी। |
+| **2** | भविष्य में रिलीज़ होने वाली फिल्मों की सूची देखें। |
+| **3** | डेटाबेस में मौजूद सभी फिल्मों की सूची देखें। |
+| **4** | यूज़रनेम और मूवी ID देकर फिल्म को वॉच्ड मार्क करें। |
+| **5** | किसी यूज़र द्वारा देखी गई फिल्मों की सूची देखें। |
+| **6** | नया यूज़र रजिस्टर करें। |
+| **7** | आंशिक शीर्षक से फिल्म खोजें। |
+| **8** | ऐप से बाहर निकलें। |
 
-## Database Schema
+## डेटाबेस स्कीमा
 
-The app creates three tables in `data.db`:
+ऐप `data.db` में तीन टेबल बनाता है:
 
 ### `movies`
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | INTEGER (PK) | Auto-incremented movie ID |
-| `title` | TEXT | Movie title |
-| `release_timestamp` | REAL | Release date stored as a Unix timestamp |
+| कॉलम | टाइप | विवरण |
+|------|------|-------|
+| `id` | INTEGER (PK) | ऑटो-इन्क्रिमेंट मूवी ID |
+| `title` | TEXT | फिल्म का शीर्षक |
+| `release_timestamp` | REAL | रिलीज़ डेट (Unix टाइमस्टैम्प) |
 
 ### `users`
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `username` | TEXT (PK) | Unique username |
+| कॉलम | टाइप | विवरण |
+|------|------|-------|
+| `username` | TEXT (PK) | यूनिक यूज़रनेम |
 
 ### `watched`
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `user_username` | TEXT (FK → users) | Username of the viewer |
-| `movie_id` | INTEGER (FK → movies) | ID of the watched movie |
+| कॉलम | टाइप | विवरण |
+|------|------|-------|
+| `user_username` | TEXT (FK → users) | देखने वाले यूज़र का नाम |
+| `movie_id` | INTEGER (FK → movies) | देखी गई फिल्म की ID |
 
-An index (`movies_release_idx`) is created on `movies.release_timestamp` for efficient upcoming-movie queries.
+आने वाली फिल्मों के लिए `movies.release_timestamp` पर `movies_release_idx` इंडेक्स बनाया जाता है।
 
-## Project Structure
+## प्रोजेक्ट स्ट्रक्चर
 
 ```
 .
-├── app.py          # CLI interface and menu logic
-├── database.py     # SQLite database queries and connection
-├── data.db         # SQLite database (auto-created)
+├── app.py          # CLI इंटरफेस और मेन्यू लॉजिक
+├── database.py     # SQLite क्वेरी और कनेक्शन
+├── data.db         # SQLite डेटाबेस (ऑटो-क्रिएटेड)
 └── README.md
 ```
 
-## Example Session
+## उदाहरण सत्र
 
 ```
 Welcome to the watchlist app!
@@ -141,27 +141,25 @@ Enter partial movie title: dune
 Your selection: 8
 ```
 
-## Known Limitations / Future Improvements
+## सीमाएँ / भविष्य के सुधार
 
-<!-- TODO: These are open issues worth addressing in future iterations. -->
+- **Python संस्करण** — `:=` ऑपरेटर के कारण Python 3.8+ जरूरी है।
+- **इनपुट वैलिडेशन नहीं** — गलत तारीख, गलत यूज़र या गलत ID पर एरर आ सकते हैं।
+- **डिलीट/एडिट सपोर्ट नहीं** — मूवी और यूज़र अपडेट या हटाए नहीं जा सकते।
+- **डुप्लिकेट वॉच रिकॉर्ड** — एक ही फिल्म को कई बार वॉच्ड मार्क किया जा सकता है।
+- **Foreign key enforcement** — SQLite में foreign keys रनटाइम पर एनेबल नहीं हैं।
+- **पेजिनेशन नहीं** — लंबी मूवी लिस्ट पूरी छपती है।
+- **हार्डकोडेड DB पाथ** — `data.db` हमेशा करंट डायरेक्टरी में रहता है।
+- **टेस्ट नहीं** — अभी कोई ऑटोमेटेड टेस्ट नहीं है।
 
-- **Python version** — Requires 3.8+ due to the walrus operator (`:=`). Consider refactoring for broader compatibility if needed.
-- **No input validation** — Invalid dates, non-existent usernames, or bad movie IDs will raise unhandled exceptions.
-- **No delete or edit** — Movies and users cannot be updated or removed once added.
-- **Duplicate watches** — A user can mark the same movie as watched multiple times; there is no uniqueness constraint on the `watched` table.
-- **Foreign key enforcement** — SQLite foreign keys are defined but not enforced at runtime (`PRAGMA foreign_keys` is not enabled), so orphaned references are possible.
-- **No pagination** — Large movie lists are printed in full with no paging.
-- **Hardcoded DB path** — The database file is always `data.db` in the current working directory; consider making it configurable via an environment variable.
-- **No tests** — The project has no automated test suite yet.
+## योगदान
 
-## Contributing
+1. रिपॉजिटरी fork करें।
+2. एक फीचर ब्रांच बनाएं (`git checkout -b feature/my-feature`).
+3. बदलाव commit करें (`git commit -m "Add my feature"`).
+4. ब्रांच push करें (`git push origin feature/my-feature`).
+5. Pull Request खोलें।
 
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature/my-feature`).
-3. Commit your changes (`git commit -m "Add my feature"`).
-4. Push to the branch (`git push origin feature/my-feature`).
-5. Open a Pull Request.
+## लाइसेंस
 
-## License
-
-This project is not currently published under a specific license. Add a `LICENSE` file to define distribution terms.
+यह प्रोजेक्ट अभी किसी विशेष लाइसेंस के अंतर्गत प्रकाशित नहीं है। डिस्ट्रीब्यूशन टर्म्स तय करने के लिए `LICENSE` फाइल जोड़ें।
