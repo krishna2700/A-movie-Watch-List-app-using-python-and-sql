@@ -47,7 +47,8 @@ Please select one of the following options:
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
-8) Exit.
+8) Select user profile (follow-up view, up to 50 movies).
+9) Exit.
 ```
 
 | Option | Description |
@@ -59,7 +60,8 @@ Please select one of the following options:
 | **5** | View all movies a specific user has watched. |
 | **6** | Register a new user by username. |
 | **7** | Search for movies by a partial title match. |
-| **8** | Exit the application. |
+| **8** | Select a single user and see their full profile: total watched count, up to 50 watched movies, and up to 50 unwatched movie suggestions. |
+| **9** | Exit the application. |
 
 ## Database Schema
 
@@ -139,6 +141,19 @@ Enter partial movie title: dune
 ----
 
 Your selection: 8
+Username: alice
+
+== Profile for 'alice' ==
+Total movies watched: 1
+
+-- Watched movies (showing up to 50) --
+  1: Inception (on Jul 16 2010)
+
+-- Suggestions: movies not yet watched (up to 50) --
+  2: Dune Part Three (on Mar 15 2026)
+====
+
+Your selection: 9
 ```
 
 ## Known Limitations / Future Improvements

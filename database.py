@@ -34,6 +34,22 @@ JOIN watched ON users.username = watched.user_username
 JOIN movies ON watched.movie_id = movies.id
 WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
+SELECT_USER = "SELECT username FROM users WHERE username = ?;"
+SELECT_WATCHED_MOVIES_LIMITED = """SELECT movies.*
+FROM users
+JOIN watched ON users.username = watched.user_username
+JOIN movies ON watched.movie_id = movies.id
+WHERE users.username = ?
+LIMIT ?;"""
+SELECT_WATCHED_COUNT = """SELECT COUNT(*)
+FROM watched
+WHERE user_username = ?;"""
+SELECT_UNWATCHED_MOVIES = """SELECT movies.*
+FROM movies
+WHERE movies.id NOT IN (
+    SELECT watched.movie_id FROM watched WHERE watched.user_username = ?
+)
+LIMIT ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
 connection = sqlite3.connect("data.db")
@@ -85,4 +101,33 @@ def search_movies(search_term):
     with connection:
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
+        return cursor.fetchall()
+
+
+def user_exists(username):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_USER, (username,))
+        return cursor.fetchone() is not None
+
+
+def get_watched_movies_limited(username, limit=50):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_WATCHED_MOVIES_LIMITED, (username, limit))
+        return cursor.fetchall()
+
+
+def get_watched_count(username):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_WATCHED_COUNT, (username,))
+        row = cursor.fetchone()
+        return row[0] if row else 0
+
+
+def get_unwatched_movies(username, limit=50):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_UNWATCHED_MOVIES, (username, limit))
         return cursor.fetchall()

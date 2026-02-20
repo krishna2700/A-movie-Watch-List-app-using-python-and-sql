@@ -13,7 +13,8 @@ menu = """Please select one of the following options:
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
-8) Exit.
+8) Select user profile (follow-up view, up to 50 movies).
+9) Exit.
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
@@ -60,10 +61,46 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
+def prompt_select_user_profile():
+    username = input("Username: ")
+    if not database.user_exists(username):
+        print(f"User '{username}' not found. Please add the user first (option 6).")
+        return
+
+    watched_count = database.get_watched_count(username)
+    watched = database.get_watched_movies_limited(username, limit=50)
+    unwatched = database.get_unwatched_movies(username, limit=50)
+
+    print(f"\n== Profile for '{username}' ==")
+    print(f"Total movies watched: {watched_count}")
+
+    if watched:
+        print(f"\n-- Watched movies (showing up to 50) --")
+        for movie in watched:
+            movie_date = datetime.datetime.fromtimestamp(movie[2])
+            human_date = movie_date.strftime("%b %d %Y")
+            print(f"  {movie[0]}: {movie[1]} (on {human_date})")
+        if watched_count > 50:
+            print(f"  ... and {watched_count - 50} more.")
+    else:
+        print("\nNo movies watched yet.")
+
+    if unwatched:
+        print(f"\n-- Suggestions: movies not yet watched (up to 50) --")
+        for movie in unwatched:
+            movie_date = datetime.datetime.fromtimestamp(movie[2])
+            human_date = movie_date.strftime("%b %d %Y")
+            print(f"  {movie[0]}: {movie[1]} (on {human_date})")
+    else:
+        print("\nYou've watched every movie in the catalog!")
+
+    print("====\n")
+
+
 print(welcome)
 database.create_tables()
 
-while (user_input := input(menu)) != "8":
+while (user_input := input(menu)) != "9":
     if user_input == "1":
         prompt_add_movie()
     elif user_input == "2":
@@ -88,5 +125,7 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "8":
+        prompt_select_user_profile()
     else:
         print("Invalid input, please try again!")
