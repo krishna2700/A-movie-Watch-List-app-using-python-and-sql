@@ -5,3 +5,4 @@ export { default as Modal } from './Modal/Modal';
 export { default as Alert } from './Alert/Alert';
 export { default as Badge } from './Badge/Badge';
 export { default as Spinner } from './Spinner/Spinner';
+export { default as Section } from './Section/Section';

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import './App.css';
-import { 
-  Button, 
-  Card, 
-  Input, 
-  Modal, 
-  Alert, 
-  Badge, 
-  Spinner 
+import {
+  Button,
+  Card,
+  Input,
+  Modal,
+  Alert,
+  Badge,
+  Spinner,
+  Section
 } from './components';
 
 function App() {
@@ -74,8 +75,10 @@ function App() {
           </Alert>
         )}
 
-        <section className="section">
-          <h2>Buttons</h2>
+        <Section
+          title="Buttons"
+          description="Choose variants and sizes for any action."
+        >
           <div className="component-showcase">
             <Button variant="primary">Primary</Button>
             <Button variant="secondary">Secondary</Button>
@@ -87,10 +90,12 @@ function App() {
             <Button size="medium">Medium</Button>
             <Button size="large">Large</Button>
           </div>
-        </section>
+        </Section>
 
-        <section className="section">
-          <h2>Badges</h2>
+        <Section
+          title="Badges"
+          description="Add labels that communicate status at a glance."
+        >
           <div className="component-showcase">
             <Badge variant="primary">Primary</Badge>
             <Badge variant="secondary">Secondary</Badge>
@@ -104,13 +109,15 @@ function App() {
             <Badge variant="success" rounded>99+</Badge>
             <Badge variant="danger" rounded>New</Badge>
           </div>
-        </section>
+        </Section>
 
-        <section className="section">
-          <h2>Cards</h2>
+        <Section
+          title="Cards"
+          description="Group content with consistent padding and elevation."
+        >
           <div className="cards-grid">
-            <Card 
-              title="Basic Card" 
+            <Card
+              title="Basic Card"
               subtitle="This is a subtitle"
               hoverable
             >
@@ -136,10 +143,12 @@ function App() {
               <Badge variant="success">Featured</Badge>
             </Card>
           </div>
-        </section>
+        </Section>
 
-        <section className="section">
-          <h2>Form Components</h2>
+        <Section
+          title="Form Components"
+          description="Compose accessible forms with reusable inputs."
+        >
           <Card title="Sample Form">
             <form onSubmit={handleSubmit}>
               <Input
@@ -175,10 +184,12 @@ function App() {
               </div>
             </form>
           </Card>
-        </section>
+        </Section>
 
-        <section className="section">
-          <h2>Modal</h2>
+        <Section
+          title="Modal"
+          description="Display focused dialogs without leaving the page."
+        >
           <Button onClick={() => setIsModalOpen(true)}>
             Open Modal
           </Button>
@@ -210,10 +221,12 @@ function App() {
             <p>This is a reusable modal component. It can contain any content you want!</p>
             <p>Click outside the modal or press the close button to dismiss it.</p>
           </Modal>
-        </section>
+        </Section>
 
-        <section className="section">
-          <h2>Alerts</h2>
+        <Section
+          title="Alerts"
+          description="Use alert messages to provide immediate feedback."
+        >
           <Alert type="success">
             This is a success alert!
           </Alert>
@@ -223,17 +236,19 @@ function App() {
           <Alert type="danger">
             This is a danger alert!
           </Alert>
-        </section>
+        </Section>
 
-        <section className="section">
-          <h2>Spinners</h2>
+        <Section
+          title="Spinners"
+          description="Show progress indicators while content loads."
+        >
           <div className="component-showcase">
             <Spinner size="small" color="primary" />
             <Spinner size="medium" color="success" />
             <Spinner size="large" color="danger" />
           </div>
           <Spinner centered color="primary" />
-        </section>
+        </Section>
       </main>
 
       <footer className="App-footer">
