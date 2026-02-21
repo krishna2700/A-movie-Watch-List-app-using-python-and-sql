@@ -9,7 +9,9 @@ menu = """Please select one of the following options:
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
-8) Exit.
+8) Add a branch.
+9) Select base branch for follow-up tasks.
+10) Exit.
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
@@ -54,10 +56,37 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
+def prompt_add_branch():
+    name = input("Branch name: ").strip()
+    if not name:
+        print("Branch name cannot be empty.")
+        return
+    database.add_branch(name)
+    print(f"Branch '{name}' added.")
+
+
+def prompt_select_base_branch():
+    branches = database.get_branches()
+    if not branches:
+        print("No branches available. Add a branch first.")
+        return
+    current_base = database.get_base_branch()
+    print("Available branches:")
+    for branch in branches:
+        marker = " (current base)" if branch == current_base else ""
+        print(f"- {branch}{marker}")
+    selection = input("Select base branch: ").strip()
+    if selection not in branches:
+        print("Invalid branch selection.")
+        return
+    database.set_base_branch(selection)
+    print(f"Base branch set to '{selection}'.")
+
+
 print(welcome)
 database.create_tables()
 
-while (user_input := input(menu)) != "8":
+while (user_input := input(menu)) != "10":
     if user_input == "1":
         prompt_add_movie()
     elif user_input == "2":
@@ -82,5 +111,9 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "8":
+        prompt_add_branch()
+    elif user_input == "9":
+        prompt_select_base_branch()
     else:
         print("Invalid input, please try again!")
