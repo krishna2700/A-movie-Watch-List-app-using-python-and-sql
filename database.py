@@ -31,6 +31,22 @@ WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
+CREATE_TASKS_TABLE = """CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_name TEXT NOT NULL,
+    branch_name TEXT NOT NULL,
+    parent_task_id INTEGER,
+    created_at REAL NOT NULL,
+    is_initial_task INTEGER DEFAULT 1,
+    FOREIGN KEY(parent_task_id) REFERENCES tasks(id)
+);"""
+
+INSERT_TASK = "INSERT INTO tasks (task_name, branch_name, parent_task_id, created_at, is_initial_task) VALUES (?, ?, ?, ?, ?)"
+SELECT_ALL_TASKS = "SELECT * FROM tasks ORDER BY created_at DESC;"
+SELECT_INITIAL_TASKS = "SELECT * FROM tasks WHERE is_initial_task = 1 ORDER BY created_at DESC;"
+SELECT_TASK_BY_ID = "SELECT * FROM tasks WHERE id = ?;"
+SELECT_FOLLOW_UP_TASKS = "SELECT * FROM tasks WHERE parent_task_id = ?;"
+
 connection = sqlite3.connect("data.db")
 
 
@@ -40,6 +56,7 @@ def create_tables():
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
+        connection.execute(CREATE_TASKS_TABLE)
 
 
 def add_movie(title, release_timestamp):
@@ -79,4 +96,41 @@ def search_movies(search_term):
     with connection:
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
+        return cursor.fetchall()
+
+
+def add_task(task_name, branch_name, parent_task_id=None, is_initial_task=True):
+    with connection:
+        created_at = datetime.datetime.now().timestamp()
+        connection.execute(
+            INSERT_TASK, (task_name, branch_name, parent_task_id, created_at, 1 if is_initial_task else 0)
+        )
+        return connection.execute("SELECT last_insert_rowid()").fetchone()[0]
+
+
+def get_all_tasks():
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_ALL_TASKS)
+        return cursor.fetchall()
+
+
+def get_initial_tasks():
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_INITIAL_TASKS)
+        return cursor.fetchall()
+
+
+def get_task_by_id(task_id):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_TASK_BY_ID, (task_id,))
+        return cursor.fetchone()
+
+
+def get_follow_up_tasks(parent_task_id):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_FOLLOW_UP_TASKS, (parent_task_id,))
         return cursor.fetchall()
