@@ -1,5 +1,12 @@
 import datetime
 import database
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 menu = """Please select one of the following options:
 1) Add new movie.
