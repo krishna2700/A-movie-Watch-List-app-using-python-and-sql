@@ -1,36 +1,39 @@
 import datetime
 import database
 
+# Staging: Updated menu with rating feature
 menu = """Please select one of the following options:
 1) Add new movie.
 2) View upcoming movies.
-3) View all movies
-4) Add watched movie
+3) View all movies.
+4) Add watched movie.
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
-8) Exit.
+8) Rate a movie.
+9) Exit.
 
 Your selection: """
-welcome = "Welcome to the watchlist app!"
+welcome = "Welcome to the Movie Watchlist App! (v2.0 - Staging)"
 
 
 def prompt_add_movie():
     title = input("Movie title: ")
+    genre = input("Genre (e.g., Action, Comedy, Drama): ")
     release_date = input(
         "Release date (dd-mm-YYYY): "
     ) or datetime.datetime.today().strftime("%d-%m-%Y")
     release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
-    database.add_movie(title, release_timestamp)
+    database.add_movie(title, release_timestamp, genre)
 
 
 def print_movie_list(heading, movies):
-    print(f"-- {heading} movies --")
-    for movie in movies:
+    print(f"--- {heading} Movies (Staging) ---")
+    for _idx, movie in enumerate(movies, start=1):
         movie_date = datetime.datetime.fromtimestamp(movie[2])
-        human_date = movie_date.strftime("%b %d %Y")
-        print(f"{movie[0]}: {movie[1]} (on {human_date})")
-    print("---- \n")
+        human_date = movie_date.strftime("%B %d, %Y")
+        print(f"  [{movie[0]}] {movie[1]} | Released: {human_date}")
+    print("--- End of List ---\n")
 
 
 def prompt_watch_movie():
@@ -52,6 +55,13 @@ def prompt_add_user():
 def prompt_search_movies():
     search_term = input("Enter partial movie title: ")
     return database.search_movies(search_term)
+
+
+def prompt_rate_movie():
+    username = input("Username: ")
+    movie_id = input("Movie ID: ")
+    rating = input("Rating (1-10): ")
+    database.rate_movie(username, movie_id, int(rating))
 
 
 print(welcome)
