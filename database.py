@@ -4,7 +4,9 @@ import sqlite3
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY,
     title TEXT,
-    release_timestamp REAL
+    director TEXT DEFAULT 'Unknown',
+    release_timestamp REAL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );"""
 
 CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
@@ -18,9 +20,10 @@ CREATE_WATCHED_TABLE = """CREATE TABLE IF NOT EXISTS watched (
     FOREIGN KEY(movie_id) REFERENCES movies(id)
 );"""
 
-INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp) VALUES (?, ?)"
-SELECT_ALL_MOVIES = "SELECT * FROM movies;"
-SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > ?;"
+INSERT_MOVIE = "INSERT INTO movies (title, release_timestamp, director) VALUES (?, ?, ?)"
+DELETE_MOVIE = "DELETE FROM movies WHERE id = ?;"
+SELECT_ALL_MOVIES = "SELECT * FROM movies ORDER BY title ASC;"
+SELECT_UPCOMING_MOVIES = "SELECT * FROM movies WHERE release_timestamp > ? ORDER BY release_timestamp DESC;"
 INSERT_USER = "INSERT INTO users (username) VALUES (?)"
 INSERT_WATCHED_MOVIE = "INSERT INTO watched (user_username, movie_id) VALUES (?, ?)"
 SELECT_WATCHED_MOVIES = """SELECT movies.*
@@ -28,8 +31,18 @@ FROM users
 JOIN watched ON users.username = watched.user_username
 JOIN movies ON watched.movie_id = movies.id
 WHERE users.username = ?;"""
-SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
+SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ? ORDER BY title ASC;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
+
+CREATE_FAVORITES_TABLE = """CREATE TABLE IF NOT EXISTS favorites (
+    id INTEGER PRIMARY KEY,
+    user_username TEXT,
+    movie_id INTEGER,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_username) REFERENCES users(username),
+    FOREIGN KEY(movie_id) REFERENCES movies(id)
+);"""
+INSERT_FAVORITE = "INSERT INTO favorites (user_username, movie_id) VALUES (?, ?)"
 
 connection = sqlite3.connect("data.db")
 
@@ -40,11 +53,22 @@ def create_tables():
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
+        connection.execute(CREATE_FAVORITES_TABLE)
 
 
-def add_movie(title, release_timestamp):
+def add_movie(title, release_timestamp, director="Unknown"):
     with connection:
-        connection.execute(INSERT_MOVIE, (title, release_timestamp))
+        connection.execute(INSERT_MOVIE, (title, release_timestamp, director))
+
+
+def delete_movie(movie_id):
+    with connection:
+        connection.execute(DELETE_MOVIE, (movie_id,))
+
+
+def add_favorite(username, movie_id):
+    with connection:
+        connection.execute(INSERT_FAVORITE, (username, movie_id))
 
 
 def get_movies(upcoming=False):
@@ -79,4 +103,17 @@ def search_movies(search_term):
     with connection:
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
+        return cursor.fetchall()
+
+
+def get_favorites(username):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            """SELECT movies.* FROM favorites
+            JOIN movies ON favorites.movie_id = movies.id
+            WHERE favorites.user_username = ?
+            ORDER BY favorites.added_at DESC""",
+            (username,),
+        )
         return cursor.fetchall()
