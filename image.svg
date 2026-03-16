@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Abstract sunrise">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b3d91"/>
+      <stop offset="100%" stop-color="#8fd3ff"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffb347"/>
+      <stop offset="100%" stop-color="#ff5f6d"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#sky)"/>
+  <circle cx="100" cy="85" r="40" fill="url(#sun)"/>
+  <path d="M0 140 Q50 120 100 140 T200 140 V200 H0 Z" fill="#1f7a8c" opacity="0.9"/>
+  <path d="M0 160 Q50 150 100 160 T200 160 V200 H0 Z" fill="#145a6a" opacity="0.9"/>
+  <g stroke="#ffffff" stroke-linecap="round" stroke-width="4" opacity="0.7">
+    <line x1="40" y1="60" x2="65" y2="60"/>
+    <line x1="135" y1="60" x2="160" y2="60"/>
+    <line x1="100" y1="30" x2="100" y2="50"/>
+  </g>
+</svg>
