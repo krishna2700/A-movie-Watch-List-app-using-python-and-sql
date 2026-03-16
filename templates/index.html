@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Watchlist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        #colorButton {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #2196F3;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        #colorButton:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        #colorButton:active {
+            transform: translateY(1px);
+        }
+
+        #colorButton.green {
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Movie Watchlist App</h1>
+        <button id="colorButton" onclick="toggleColor()">Click Me</button>
+    </div>
+
+    <script>
+        function toggleColor() {
+            const button = document.getElementById('colorButton');
+            button.classList.toggle('green');
+        }
+    </script>
+</body>
+</html>
