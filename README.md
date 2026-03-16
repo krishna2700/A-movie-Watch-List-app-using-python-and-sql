@@ -1,1 +1,1 @@
-# A-movie-Watch-List-app-using-python-and-sql
+# Una aplicación de lista de películas para ver usando Python y SQL
