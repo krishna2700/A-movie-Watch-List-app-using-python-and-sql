@@ -1,0 +1,3 @@
+Java is an object-oriented, platform-independent programming language that runs on the Java Virtual Machine (JVM), allowing code to be written once and executed anywhere.
+It features automatic memory management through garbage collection, strong typing, and a rich standard library, making it popular for enterprise applications, Android development, and large-scale systems.
+Java's "write once, run anywhere" philosophy, combined with its robustness and scalability, has made it one of the most widely-used programming languages for over two decades.
