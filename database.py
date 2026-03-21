@@ -29,6 +29,7 @@ JOIN watched ON users.username = watched.user_username
 JOIN movies ON watched.movie_id = movies.id
 WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
+DELETE_MOVIE = "DELETE FROM movies WHERE id = ?"
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
 connection = sqlite3.connect("data.db")
@@ -80,3 +81,8 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def delete_movie(movie_id):
+    with connection:
+        connection.execute(DELETE_MOVIE, (movie_id,))
