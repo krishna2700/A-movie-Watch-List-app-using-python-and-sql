@@ -59,13 +59,21 @@ def get_movies(upcoming=False):
 
 
 def add_user(username):
-    with connection:
-        connection.execute(INSERT_USER, (username,))
+    try:
+        with connection:
+            connection.execute(INSERT_USER, (username,))
+    except sqlite3.IntegrityError:
+        return False
+    return True
 
 
 def watch_movie(username, movie_id):
-    with connection:
-        connection.execute(INSERT_WATCHED_MOVIE, (username, movie_id))
+    try:
+        with connection:
+            connection.execute(INSERT_WATCHED_MOVIE, (username, movie_id))
+    except sqlite3.IntegrityError:
+        return False
+    return True
 
 
 def get_watched_movies(username):

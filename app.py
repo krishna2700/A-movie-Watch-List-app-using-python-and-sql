@@ -20,7 +20,11 @@ def prompt_add_movie():
     release_date = input(
         "Release date (dd-mm-YYYY): "
     ) or datetime.datetime.today().strftime("%d-%m-%Y")
-    release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
+    try:
+        release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
+    except ValueError:
+        print("Invalid date format, using today's date instead.")
+        release_timestamp = datetime.datetime.today().timestamp()
     database.add_movie(title, release_timestamp)
 
 
@@ -35,8 +39,14 @@ def print_movie_list(heading, movies):
 
 def prompt_watch_movie():
     username = input("Username: ")
-    movie_id = input("Movie ID: ")
-    database.watch_movie(username, movie_id)
+    movie_id_input = input("Movie ID: ")
+    try:
+        movie_id = int(movie_id_input)
+    except ValueError:
+        print("Movie ID must be a number.")
+        return
+    if not database.watch_movie(username, movie_id):
+        print("Unable to mark movie as watched. Check username and movie ID.")
 
 
 def prompt_get_watched_movies():
@@ -46,7 +56,8 @@ def prompt_get_watched_movies():
 
 def prompt_add_user():
     username = input("Username: ")
-    database.add_user(username)
+    if not database.add_user(username):
+        print("That username already exists.")
 
 
 def prompt_search_movies():
