@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+from contextlib import contextmanager
 
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY,
@@ -31,24 +32,34 @@ WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
-connection = sqlite3.connect("data.db")
+DB_PATH = "data.db"
+
+@contextmanager
+def get_connection():
+    connection = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False)
+    try:
+        yield connection
+    finally:
+        connection.close()
 
 
 def create_tables():
-    with connection:
+    with get_connection() as connection:
         connection.execute(CREATE_MOVIES_TABLE)
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
+        connection.commit()
 
 
 def add_movie(title, release_timestamp):
-    with connection:
+    with get_connection() as connection:
         connection.execute(INSERT_MOVIE, (title, release_timestamp))
+        connection.commit()
 
 
 def get_movies(upcoming=False):
-    with connection:
+    with get_connection() as connection:
         cursor = connection.cursor()
         if upcoming:
             today_timestamp = datetime.datetime.today().timestamp()
@@ -59,24 +70,26 @@ def get_movies(upcoming=False):
 
 
 def add_user(username):
-    with connection:
+    with get_connection() as connection:
         connection.execute(INSERT_USER, (username,))
+        connection.commit()
 
 
 def watch_movie(username, movie_id):
-    with connection:
+    with get_connection() as connection:
         connection.execute(INSERT_WATCHED_MOVIE, (username, movie_id))
+        connection.commit()
 
 
 def get_watched_movies(username):
-    with connection:
+    with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(SELECT_WATCHED_MOVIES, (username,))
         return cursor.fetchall()
 
 
 def search_movies(search_term):
-    with connection:
+    with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
