@@ -1,5 +1,7 @@
 import datetime
 import sqlite3
+import threading
+from contextlib import contextmanager
 
 CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
     id INTEGER PRIMARY KEY,
@@ -31,25 +33,46 @@ WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
-connection = sqlite3.connect("data.db")
+# Thread-local storage for database connections
+_thread_local = threading.local()
+
+def get_connection():
+    """Get or create a connection for the current thread."""
+    if not hasattr(_thread_local, 'connection'):
+        _thread_local.connection = sqlite3.connect("data.db", check_same_thread=False, timeout=5.0)
+        # Enable WAL mode for better concurrent access
+        _thread_local.connection.execute("PRAGMA journal_mode=WAL")
+    return _thread_local.connection
+
+@contextmanager
+def get_db():
+    """Context manager for database connections."""
+    conn = get_connection()
+    try:
+        yield conn
+    except Exception:
+        conn.rollback()
+        raise
+    else:
+        conn.commit()
 
 
 def create_tables():
-    with connection:
-        connection.execute(CREATE_MOVIES_TABLE)
-        connection.execute(CREATE_USERS_TABLE)
-        connection.execute(CREATE_WATCHED_TABLE)
-        connection.execute(CREATE_RELEASE_INDEX)
+    with get_db() as conn:
+        conn.execute(CREATE_MOVIES_TABLE)
+        conn.execute(CREATE_USERS_TABLE)
+        conn.execute(CREATE_WATCHED_TABLE)
+        conn.execute(CREATE_RELEASE_INDEX)
 
 
 def add_movie(title, release_timestamp):
-    with connection:
-        connection.execute(INSERT_MOVIE, (title, release_timestamp))
+    with get_db() as conn:
+        conn.execute(INSERT_MOVIE, (title, release_timestamp))
 
 
 def get_movies(upcoming=False):
-    with connection:
-        cursor = connection.cursor()
+    with get_db() as conn:
+        cursor = conn.cursor()
         if upcoming:
             today_timestamp = datetime.datetime.today().timestamp()
             cursor.execute(SELECT_UPCOMING_MOVIES, (today_timestamp,))
@@ -59,24 +82,24 @@ def get_movies(upcoming=False):
 
 
 def add_user(username):
-    with connection:
-        connection.execute(INSERT_USER, (username,))
+    with get_db() as conn:
+        conn.execute(INSERT_USER, (username,))
 
 
 def watch_movie(username, movie_id):
-    with connection:
-        connection.execute(INSERT_WATCHED_MOVIE, (username, movie_id))
+    with get_db() as conn:
+        conn.execute(INSERT_WATCHED_MOVIE, (username, movie_id))
 
 
 def get_watched_movies(username):
-    with connection:
-        cursor = connection.cursor()
+    with get_db() as conn:
+        cursor = conn.cursor()
         cursor.execute(SELECT_WATCHED_MOVIES, (username,))
         return cursor.fetchall()
 
 
 def search_movies(search_term):
-    with connection:
-        cursor = connection.cursor()
+    with get_db() as conn:
+        cursor = conn.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
