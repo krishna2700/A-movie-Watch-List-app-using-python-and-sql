@@ -31,7 +31,17 @@ WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
-connection = sqlite3.connect("data.db")
+
+def get_connection():
+    conn = sqlite3.connect("data.db", timeout=30.0, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA synchronous=NORMAL;")
+    conn.execute("PRAGMA cache_size=-64000;")
+    conn.execute("PRAGMA busy_timeout=30000;")
+    return conn
+
+
+connection = get_connection()
 
 
 def create_tables():
