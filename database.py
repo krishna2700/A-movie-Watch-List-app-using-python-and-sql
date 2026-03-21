@@ -31,11 +31,15 @@ WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
-connection = sqlite3.connect("data.db")
+
+def get_connection():
+    conn = sqlite3.connect("data.db", timeout=30.0, isolation_level=None)
+    conn.execute("PRAGMA journal_mode=WAL")
+    return conn
 
 
 def create_tables():
-    with connection:
+    with get_connection() as connection:
         connection.execute(CREATE_MOVIES_TABLE)
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
@@ -43,12 +47,12 @@ def create_tables():
 
 
 def add_movie(title, release_timestamp):
-    with connection:
+    with get_connection() as connection:
         connection.execute(INSERT_MOVIE, (title, release_timestamp))
 
 
 def get_movies(upcoming=False):
-    with connection:
+    with get_connection() as connection:
         cursor = connection.cursor()
         if upcoming:
             today_timestamp = datetime.datetime.today().timestamp()
@@ -59,24 +63,24 @@ def get_movies(upcoming=False):
 
 
 def add_user(username):
-    with connection:
+    with get_connection() as connection:
         connection.execute(INSERT_USER, (username,))
 
 
 def watch_movie(username, movie_id):
-    with connection:
+    with get_connection() as connection:
         connection.execute(INSERT_WATCHED_MOVIE, (username, movie_id))
 
 
 def get_watched_movies(username):
-    with connection:
+    with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(SELECT_WATCHED_MOVIES, (username,))
         return cursor.fetchall()
 
 
 def search_movies(search_term):
-    with connection:
+    with get_connection() as connection:
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
