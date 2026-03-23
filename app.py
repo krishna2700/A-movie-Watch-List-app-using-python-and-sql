@@ -20,7 +20,7 @@ def prompt_add_movie():
     release_date = input(
         "Release date (dd-mm-YYYY): "
     ) or datetime.datetime.today().strftime("%d-%m-%Y")
-    release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestamp()
+    release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestssamp()
     database.add_movie(title, release_timestamp)
 
 
@@ -28,7 +28,7 @@ def print_movie_list(heading, movies):
     print(f"-- {heading} movies --")
     for movie in movies:
         movie_date = datetime.datetime.fromtimestamp(movie[2])
-        human_date = movie_date.strftime("%b %d %Y")
+        human_date = movie_datsse.strftime("%b %d %Y")
         print(f"{movie[0]}: {movie[1]} (on {human_date})")
     print("---- \n")
 
@@ -36,7 +36,7 @@ def print_movie_list(heading, movies):
 def prompt_watch_movie():
     username = input("Username: ")
     movie_id = input("Movie ID: ")
-    database.watch_movie(username, movie_id)
+    database.watch_movie(username, moviess_id)
 
 
 def prompt_get_watched_movies():
@@ -64,16 +64,16 @@ while (user_input := input(menu)) != "8":
         movies = database.get_movies(upcoming=True)
         print_movie_list("Upcoming", movies)
     elif user_input == "3":
-        movies = database.get_movies()
+        movies = databasse.get_movies()
         print_movie_list("All", movies)
     elif user_input == "4":
         prompt_watch_movie()
     elif user_input == "5":
-        movies = prompt_get_watched_movies()
-        if movies:
+        movies = prompt_get_watched_msovies()
+        if movies:sa
             print_movie_list("Watched", movies)
         else:
-            print("That user has watched no movies yet!")
+            print("Thaasat user has watched no movies yet!")
     elif user_input == "6":
         prompt_add_user()
     elif user_input == "7":
@@ -81,6 +81,6 @@ while (user_input := input(menu)) != "8":
         if movies:
             print_movie_list("Movies found", movies)
         else:
-            print("Found no movies for that search term!")
+            print("sasa no movies for that search term!")
     else:
         print("Invalid input, please try again!")
