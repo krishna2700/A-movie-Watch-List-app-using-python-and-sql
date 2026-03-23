@@ -29,9 +29,13 @@ JOIN watched ON users.username = watched.user_username
 JOIN movies ON watched.movie_id = movies.id
 WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
+DELETE_MOVIE = "DELETE FROM movies WHERE id = ?"
+COUNT_MOVIES = "SELECT COUNT(*) FROM movies;"
+COUNT_USERS = "SELECT COUNT(*) FROM users;"
+COUNT_WATCHED = "SELECT COUNT(*) FROM watched;"
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
 
-connection = sqlite3.connect("data.db")
+connection = sqlite3.connect("data.db", check_same_thread=False)
 
 
 def create_tables():
@@ -80,3 +84,24 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def delete_movie(movie_id):
+    with connection:
+        connection.execute(DELETE_MOVIE, (movie_id,))
+
+
+def get_statistics():
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(COUNT_MOVIES)
+        total_movies = cursor.fetchone()[0]
+        cursor.execute(COUNT_USERS)
+        total_users = cursor.fetchone()[0]
+        cursor.execute(COUNT_WATCHED)
+        total_watched = cursor.fetchone()[0]
+        return {
+            'total_movies': total_movies,
+            'total_users': total_users,
+            'total_watched': total_watched
+        }
