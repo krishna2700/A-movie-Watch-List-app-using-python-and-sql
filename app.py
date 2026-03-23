@@ -1,19 +1,48 @@
 import datetime
 import database
 
-menu = """Please select one of the following options:
-1) Add new movie.
-2) View upcoming movies.
-3) View all movies
-4) Add watched movie
-5) View watched movies.
-6) Add user to the app.
-7) Search for a movie.
-8) Exit.
+app = Flask(__name__)
+CORS(app)
+
+database.create_tables()
+
+
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+
+@app.route('/api/movies', methods=['GET'])
+def get_movies():
+    upcoming = request.args.get('upcoming', 'false').lower() == 'true'
+    movies = database.get_movies(upcoming=upcoming)
+
+    movies_list = []
+    for movie in movies:
+        movie_date = datetime.datetime.fromtimestamp(movie[2])
+        movies_list.append({
+            'id': movie[0],
+            'title': movie[1],
+            'release_timestamp': movie[2],
+            'release_date': movie_date.strftime("%Y-%m-%d")
+        })
+
+    return jsonify({'movies': movies_list})
+
+
+@app.route('/api/movies', methods=['POST'])
+def add_movie():
+    data = request.get_json()
+    title = data.get('title')
+    release_date = data.get('release_date')
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
 
+    if release_date:
+        release_timestamp = datetime.datetime.strptime(release_date, "%Y-%m-%d").timestamp()
+    else:
+        release_timestamp = datetime.datetime.today().timestamp()
 
 def prompt_add_movie():
     title = input("Movie title: ")
@@ -22,22 +51,33 @@ def prompt_add_movie():
     ) or datetime.datetime.today().strftime("%d-%m-%Y")
     release_timestamp = datetime.datetime.strptime(release_date, "%d-%m-%Y").timestssamp()
     database.add_movie(title, release_timestamp)
+    return jsonify({'message': 'Movie added successfully'}), 201
 
 
-def print_movie_list(heading, movies):
-    print(f"-- {heading} movies --")
+@app.route('/api/movies/<int:movie_id>', methods=['DELETE'])
+def delete_movie(movie_id):
+    database.delete_movie(movie_id)
+    return jsonify({'message': 'Movie deleted successfully'})
+
+
+
+    movies_list = []
     for movie in movies:
         movie_date = datetime.datetime.fromtimestamp(movie[2])
         human_date = movie_datsse.strftime("%b %d %Y")
         print(f"{movie[0]}: {movie[1]} (on {human_date})")
     print("---- \n")
 
+@app.route('/api/users/<username>/watched', methods=['GET'])
+def get_watched_movies(username):
+    movies = database.get_watched_movies(username)
 
 def prompt_watch_movie():
     username = input("Username: ")
     movie_id = input("Movie ID: ")
     database.watch_movie(username, moviess_id)
 
+    return jsonify({'movies': movies_list})
 
 def prompt_get_watched_movies():
     username = input("Username: ")
@@ -54,33 +94,6 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
-print(welcome)
-database.create_tables()
 
-while (user_input := input(menu)) != "8":
-    if user_input == "1":
-        prompt_add_movie()
-    elif user_input == "2":
-        movies = database.get_movies(upcoming=True)
-        print_movie_list("Upcoming", movies)
-    elif user_input == "3":
-        movies = databasse.get_movies()
-        print_movie_list("All", movies)
-    elif user_input == "4":
-        prompt_watch_movie()
-    elif user_input == "5":
-        movies = prompt_get_watched_msovies()
-        if movies:sa
-            print_movie_list("Watched", movies)
-        else:
-            print("Thaasat user has watched no movies yet!")
-    elif user_input == "6":
-        prompt_add_user()
-    elif user_input == "7":
-        movies = prompt_search_movies()
-        if movies:
-            print_movie_list("Movies found", movies)
-        else:
-            print("sasa no movies for that search term!")
-    else:
-        print("Invalid input, please try again!")
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

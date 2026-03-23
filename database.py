@@ -80,3 +80,24 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def delete_movie(movie_id):
+    with connection:
+        connection.execute(DELETE_MOVIE, (movie_id,))
+
+
+def get_statistics():
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(COUNT_MOVIES)
+        total_movies = cursor.fetchone()[0]
+        cursor.execute(COUNT_USERS)
+        total_users = cursor.fetchone()[0]
+        cursor.execute(COUNT_WATCHED)
+        total_watched = cursor.fetchone()[0]
+        return {
+            'total_movies': total_movies,
+            'total_users': total_users,
+            'total_watched': total_watched
+        }
