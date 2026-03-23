@@ -1,4 +1,13 @@
-# Movie Watchlist Application
+#!/usr/bin/env python3
+"""
+README Generator Script
+This script generates a comprehensive README.md file for the Movie Watchlist application.
+"""
+
+def generate_readme():
+    """Generate README.md content for the Movie Watchlist application."""
+
+    readme_content = """# Movie Watchlist Application
 
 A full-stack web application for managing movie watchlists built with Python, Flask, SQLite, and HTML/JavaScript.
 
@@ -117,8 +126,8 @@ Open your browser and navigate to `http://localhost:5000`
 
 **Add a movie:**
 ```bash
-curl -X POST http://localhost:5000/api/movies \
-  -H "Content-Type: application/json" \
+curl -X POST http://localhost:5000/api/movies \\
+  -H "Content-Type: application/json" \\
   -d '{"title": "Inception", "release_date": "2026-07-16"}'
 ```
 
@@ -159,3 +168,25 @@ This project is open source and available for educational purposes.
 ## Author
 
 Movie Watchlist Application - Python & SQL Project
+"""
+
+    return readme_content
+
+
+def main():
+    """Main function to generate and write README.md file."""
+    print("Generating README.md...")
+
+    readme_content = generate_readme()
+
+    # Write to README.md file
+    with open('README.md', 'w', encoding='utf-8') as f:
+        f.write(readme_content)
+
+    print("✓ README.md has been successfully generated!")
+    print(f"✓ Total lines: {len(readme_content.splitlines())}")
+    print(f"✓ Total characters: {len(readme_content)}")
+
+
+if __name__ == "__main__":
+    main()
