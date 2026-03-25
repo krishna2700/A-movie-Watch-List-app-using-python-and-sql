@@ -8,7 +8,8 @@ CREATE_MOVIES_TABLE = """CREATE TABLE IF NOT EXISTS movies (
 );"""
 
 CREATE_USERS_TABLE = """CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY
+    username TEXT PRIMARY KEY,
+    credits INTEGER DEFAULT 0
 );"""
 
 CREATE_WATCHED_TABLE = """CREATE TABLE IF NOT EXISTS watched (
@@ -30,6 +31,8 @@ JOIN movies ON watched.movie_id = movies.id
 WHERE users.username = ?;"""
 SEARCH_MOVIE = """SELECT * FROM movies WHERE title LIKE ?;"""
 CREATE_RELEASE_INDEX = """CREATE INDEX IF NOT EXISTS movies_release_idx ON movies (release_timestamp);"""
+SELECT_USER_CREDITS = """SELECT credits FROM users WHERE username = ?;"""
+UPDATE_USER_CREDITS = """UPDATE users SET credits = ? WHERE username = ?;"""
 
 connection = sqlite3.connect("data.db")
 
@@ -40,6 +43,11 @@ def create_tables():
         connection.execute(CREATE_USERS_TABLE)
         connection.execute(CREATE_WATCHED_TABLE)
         connection.execute(CREATE_RELEASE_INDEX)
+        # Migrate existing users table to add credits column if it doesn't exist
+        try:
+            connection.execute("ALTER TABLE users ADD COLUMN credits INTEGER DEFAULT 0")
+        except:
+            pass  # Column already exists
 
 
 def add_movie(title, release_timestamp):
@@ -80,3 +88,20 @@ def search_movies(search_term):
         cursor = connection.cursor()
         cursor.execute(SEARCH_MOVIE, (f"%{search_term}%",))
         return cursor.fetchall()
+
+
+def get_user_credits(username):
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(SELECT_USER_CREDITS, (username,))
+        result = cursor.fetchone()
+        if result:
+            # Don't show negative credits, return 0 instead
+            credits = result[0]
+            return max(0, credits)
+        return 0
+
+
+def update_user_credits(username, credits):
+    with connection:
+        connection.execute(UPDATE_USER_CREDITS, (credits, username))

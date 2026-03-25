@@ -9,7 +9,9 @@ menu = """Please select one of the following options:
 5) View watched movies.
 6) Add user to the app.
 7) Search for a movie.
-8) Exit.
+8) View user credits.
+9) Update user credits.
+10) Exit.
 
 Your selection: """
 welcome = "Welcome to the watchlist app!"
@@ -54,10 +56,27 @@ def prompt_search_movies():
     return database.search_movies(search_term)
 
 
+def prompt_view_credits():
+    username = input("Username: ")
+    credits = database.get_user_credits(username)
+    # Credits dialog - shows 0 if negative (handled in database layer)
+    print(f"\n--- Credits Dialog ---")
+    print(f"User: {username}")
+    print(f"Credits: {credits}")
+    print("---------------------\n")
+
+
+def prompt_update_credits():
+    username = input("Username: ")
+    credits = int(input("Credits amount: "))
+    database.update_user_credits(username, credits)
+    print(f"Credits updated for {username}")
+
+
 print(welcome)
 database.create_tables()
 
-while (user_input := input(menu)) != "8":
+while (user_input := input(menu)) != "10":
     if user_input == "1":
         prompt_add_movie()
     elif user_input == "2":
@@ -82,5 +101,9 @@ while (user_input := input(menu)) != "8":
             print_movie_list("Movies found", movies)
         else:
             print("Found no movies for that search term!")
+    elif user_input == "8":
+        prompt_view_credits()
+    elif user_input == "9":
+        prompt_update_credits()
     else:
         print("Invalid input, please try again!")
