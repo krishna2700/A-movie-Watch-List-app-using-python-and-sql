@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blackbox Cloud Tasks</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-tertiary: #1a1a24;
+      --bg-hover: #22222e;
+      --bg-active: #2a2a38;
+      --border-color: #2a2a3a;
+      --border-light: #333346;
+      --text-primary: #e4e4ed;
+      --text-secondary: #9494a8;
+      --text-muted: #6b6b80;
+      --accent-green: #34d399;
+      --accent-blue: #60a5fa;
+      --accent-purple: #a78bfa;
+      --accent-pink: #f472b6;
+      --accent-yellow: #fbbf24;
+      --accent-red: #ef4444;
+      --diff-add-bg: rgba(52, 211, 153, 0.08);
+      --diff-add-text: #6ee7b7;
+      --diff-remove-bg: rgba(239, 68, 68, 0.08);
+      --diff-remove-text: #fca5a5;
+      --diff-header-bg: rgba(96, 165, 250, 0.08);
+      --diff-header-text: #93c5fd;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ===== TOP NAV ===== */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 16px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .top-nav-left { display: flex; align-items: center; gap: 16px; }
+    .hamburger { color: var(--text-secondary); cursor: pointer; font-size: 18px; }
+    .top-nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 6px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary); color: var(--text-primary);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover { background: var(--bg-hover); border-color: var(--border-light); }
+    .nav-btn.primary { background: var(--accent-blue); border-color: var(--accent-blue); color: #000; }
+    .nav-btn.primary:hover { opacity: 0.9; }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: #fff; cursor: pointer;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main-layout {
+      display: flex;
+      height: calc(100vh - 48px);
+    }
+
+    /* ===== LEFT PANEL ===== */
+    .left-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-color);
+      min-width: 0;
+    }
+
+    /* Task Meta */
+    .task-meta {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: grid;
+      grid-template-columns: auto 1fr auto 1fr;
+      gap: 8px 20px;
+      font-size: 13px;
+    }
+    .meta-label { color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+    .meta-value { color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+    .meta-value a { color: var(--accent-blue); text-decoration: none; }
+    .meta-value a:hover { text-decoration: underline; }
+    .branch-tag {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 4px;
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--text-secondary); cursor: pointer;
+    }
+    .branch-tag .copy-icon { font-size: 10px; opacity: 0.5; }
+    .branch-tag:hover .copy-icon { opacity: 1; }
+
+    /* Agents Row */
+    .agents-row {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .agents-label { color: var(--text-muted); font-size: 13px; font-weight: 500; }
+    .agent-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 20px;
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      font-size: 12px; color: var(--text-secondary);
+      cursor: pointer; transition: all 0.15s; user-select: none;
+    }
+    .agent-chip:hover { border-color: var(--border-light); background: var(--bg-hover); }
+    .agent-chip.selected { border-color: var(--accent-green); background: rgba(52, 211, 153, 0.08); }
+    .agent-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .agent-separator { color: var(--text-muted); font-size: 11px; }
+
+    /* Chat Area */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    .chat-msg.agent {
+      align-self: flex-start;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+    .agent-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px; font-size: 13px;
+    }
+    .agent-header .agent-name { font-weight: 600; color: var(--text-primary); }
+    .agent-header .agent-model { color: var(--text-muted); font-size: 12px; }
+    .execution-steps {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 8px;
+      background: var(--bg-tertiary); font-size: 13px;
+      color: var(--text-secondary); margin-top: 8px;
+    }
+    .execution-steps .chevron { cursor: pointer; }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-secondary);
+    }
+    .model-selector {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 6px;
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      font-size: 12px; color: var(--text-secondary); cursor: pointer;
+    }
+    .model-selector .chevron-down { font-size: 10px; margin-left: 2px; }
+    .multi-agent-toggle {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .toggle-switch {
+      width: 32px; height: 18px; border-radius: 9px;
+      background: var(--bg-active); cursor: pointer;
+      position: relative; transition: background 0.2s;
+    }
+    .toggle-switch.active { background: var(--accent-green); }
+    .toggle-switch::after {
+      content: '';
+      position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; transition: transform 0.2s;
+    }
+    .toggle-switch.active::after { transform: translateX(14px); }
+    .add-model-btn {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      color: var(--text-muted); font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .add-model-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+    .stop-btn {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .stop-btn .stop-icon {
+      width: 10px; height: 10px; background: var(--text-secondary); border-radius: 2px;
+    }
+    .task-status {
+      flex: 1;
+      font-size: 13px; color: var(--text-muted); font-style: italic;
+    }
+
+    /* ===== RIGHT PANEL ===== */
+    .right-panel {
+      width: 420px;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-secondary);
+    }
+
+    /* Live Git Changes Header */
+    .git-changes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .git-changes-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 600;
+    }
+    .git-changes-title .git-icon {
+      width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .live-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* MODEL TABS - The key feature */
+    .model-tabs-container {
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-primary);
+    }
+    .model-tabs {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .model-tabs::-webkit-scrollbar { display: none; }
+    .model-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 16px;
+      font-size: 12px; font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .model-tab:hover {
+      color: var(--text-secondary);
+      background: var(--bg-hover);
+    }
+    .model-tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent-green);
+      background: var(--bg-secondary);
+    }
+    .model-tab .tab-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .model-tab .tab-changes {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var(--bg-active);
+      color: var(--text-muted);
+    }
+    .model-tab.active .tab-changes {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--accent-green);
+    }
+    .no-tabs-msg {
+      padding: 12px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* Diff Content */
+    .diff-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+    }
+    .diff-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 13px;
+      gap: 8px;
+    }
+    .diff-empty .empty-icon { font-size: 32px; opacity: 0.3; }
+
+    /* Diff file */
+    .diff-file {
+      border-bottom: 1px solid var(--border-color);
+    }
+    .diff-file-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .diff-file-header:hover { background: var(--bg-hover); }
+    .diff-file-name {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 500;
+    }
+    .diff-file-status {
+      font-size: 10px; padding: 2px 6px; border-radius: 4px;
+      font-weight: 600; text-transform: uppercase;
+    }
+    .diff-file-status.modified { background: rgba(251, 191, 36, 0.15); color: var(--accent-yellow); }
+    .diff-file-status.added { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+    .diff-file-status.deleted { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+    .diff-file-stats {
+      display: flex; gap: 8px; font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .diff-file-stats .additions { color: var(--accent-green); }
+    .diff-file-stats .deletions { color: var(--accent-red); }
+
+    .diff-lines {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .diff-line {
+      padding: 0 16px 0 12px;
+      white-space: pre;
+      border-left: 3px solid transparent;
+    }
+    .diff-line.add {
+      background: var(--diff-add-bg);
+      color: var(--diff-add-text);
+      border-left-color: var(--accent-green);
+    }
+    .diff-line.remove {
+      background: var(--diff-remove-bg);
+      color: var(--diff-remove-text);
+      border-left-color: var(--accent-red);
+    }
+    .diff-line.header {
+      background: var(--diff-header-bg);
+      color: var(--diff-header-text);
+      padding: 4px 16px 4px 12px;
+      font-weight: 500;
+    }
+    .diff-line.context { color: var(--text-muted); }
+
+    .diff-summary {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 16px;
+      font-size: 12px; color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-primary);
+    }
+    .diff-summary .stat { display: flex; align-items: center; gap: 4px; }
+
+    /* Divider line between diff and terminal */
+    .panel-divider {
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    /* Terminal */
+    .terminal-section {
+      height: 180px;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid var(--border-color);
+    }
+    .terminal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+    }
+    .terminal-title { font-size: 13px; font-weight: 600; }
+    .terminal-actions { display: flex; gap: 8px; }
+    .terminal-action {
+      width: 24px; height: 24px; border-radius: 4px;
+      background: transparent; border: none;
+      color: var(--text-muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; transition: all 0.15s;
+    }
+    .terminal-action:hover { background: var(--bg-hover); color: var(--text-secondary); }
+    .terminal-body {
+      flex: 1;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent-green);
+      overflow-y: auto;
+      background: var(--bg-primary);
+    }
+    .terminal-prompt { color: var(--text-muted); }
+
+    /* Push to Branch */
+    .push-section {
+      border-top: 1px solid var(--border-color);
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+    }
+    .push-label {
+      font-size: 12px; color: var(--text-muted); margin-bottom: 8px;
+    }
+    .push-branch-info {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .push-branch-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--text-secondary);
+      padding: 4px 10px; border-radius: 4px;
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .push-actions {
+      display: flex; gap: 8px;
+    }
+    .push-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 6px;
+      background: var(--bg-tertiary); border: 1px solid var(--border-color);
+      color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s; font-size: 16px;
+    }
+    .push-btn:hover { background: var(--bg-hover); color: var(--text-secondary); border-color: var(--border-light); }
+    .push-btn.push-main {
+      background: var(--accent-green); border-color: var(--accent-green);
+      color: #000; font-size: 14px;
+    }
+    .push-btn.push-main:hover { opacity: 0.9; }
+    .push-btn.push-main:disabled {
+      opacity: 0.4; cursor: not-allowed;
+    }
+    .push-no-model {
+      font-size: 12px; color: var(--text-muted); text-align: center;
+      padding: 8px; font-style: italic;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      padding: 12px 20px; border-radius: 8px;
+      background: var(--bg-tertiary); border: 1px solid var(--accent-green);
+      color: var(--accent-green); font-size: 13px;
+      transform: translateY(100px); opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg-active); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+    /* Model selector dropdown */
+    .model-dropdown {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 8px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px;
+      min-width: 240px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      z-index: 100;
+      display: none;
+    }
+    .model-dropdown.show { display: block; }
+    .model-dropdown-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 6px;
+      font-size: 13px; color: var(--text-secondary);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .model-dropdown-item:hover { background: var(--bg-hover); }
+    .model-dropdown-item.selected { background: rgba(52, 211, 153, 0.08); color: var(--accent-green); }
+    .model-dropdown-item .check { width: 16px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <!-- TOP NAV -->
+  <nav class="top-nav">
+    <div class="top-nav-left">
+      <span class="hamburger">☰</span>
+    </div>
+    <div class="top-nav-right">
+      <button class="nav-btn">+ New Task</button>
+      <button class="nav-btn">Buy Credits</button>
+      <button class="nav-btn primary">⬇ Export Context</button>
+      <div class="avatar">R</div>
+    </div>
+  </nav>
+
+  <!-- MAIN LAYOUT -->
+  <div class="main-layout">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+
+      <!-- Task Meta -->
+      <div class="task-meta">
+        <span class="meta-label">Repo</span>
+        <span class="meta-value"><a href="#">rch35/blackbox_cli</a></span>
+        <span class="meta-label">Created</span>
+        <span class="meta-value">19:25:42</span>
+
+        <span class="meta-label">Base Branch</span>
+        <span class="meta-value">
+          <span style="font-size: 14px;">🔀</span> add_acp_support
+        </span>
+        <span class="meta-label">Completed</span>
+        <span class="meta-value">Not completed</span>
+
+        <span class="meta-label">Branches</span>
+        <span class="meta-value" id="branches-list" style="grid-column: 2 / -1; flex-wrap: wrap; gap: 6px;">
+          <!-- Dynamically populated -->
+        </span>
+      </div>
+
+      <!-- Agents Row -->
+      <div class="agents-row">
+        <span class="agents-label">Agents</span>
+        <span style="color: var(--text-muted);">|</span>
+        <div id="agent-chips" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Chat Area -->
+      <div class="chat-area">
+        <div class="chat-msg user">
+          create a readme file
+        </div>
+        <div class="chat-msg agent">
+          <div class="agent-header">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--bg-active); display: flex; align-items: center; justify-content: center; font-size: 12px;">◎</div>
+            <span class="agent-name">Blackbox</span>
+            <span class="agent-model" id="active-agent-label">Claude Sonnet 4.6</span>
+          </div>
+          <div class="execution-steps">
+            <span class="chevron">▸</span>
+            <span>◎</span>
+            <span id="execution-count">179 execution steps</span>
+            <span style="color: var(--text-muted);">·</span>
+            <span>○ Executed command</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="bottom-bar" style="position: relative;">
+        <div class="model-selector" onclick="toggleModelDropdown()">
+          <span>Base: blackbox</span>
+          <span class="chevron-down">▾</span>
+        </div>
+        <div class="model-selector">
+          <span>◎ Blackbox</span>
+          <span class="chevron-down">▾</span>
+        </div>
+        <div class="model-selector">
+          <span>BLACKBOX PRO</span>
+          <span class="chevron-down">▾</span>
+        </div>
+        <div class="multi-agent-toggle">
+          <div class="toggle-switch active" id="multi-agent-toggle" onclick="toggleMultiAgent()"></div>
+          <span>Multi-Agent</span>
+        </div>
+        <div class="add-model-btn" onclick="toggleModelDropdown()" title="Add model">+</div>
+        <span class="task-status">Task is running...</span>
+        <div class="stop-btn" title="Stop task">
+          <div class="stop-icon"></div>
+        </div>
+
+        <!-- Model Dropdown -->
+        <div class="model-dropdown" id="model-dropdown">
+          <div style="padding: 6px 12px 8px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Select Models</div>
+          {% for model in models %}
+          <div class="model-dropdown-item" data-model-id="{{ model.id }}" onclick="toggleModelSelection('{{ model.id }}')">
+            <span class="check" id="check-{{ model.id }}"></span>
+            <span class="agent-dot" style="background: {{ model.color }};"></span>
+            <span>{{ model.provider }} ({{ model.name }})</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <!-- Live Git Changes Header -->
+      <div class="git-changes-header">
+        <div class="git-changes-title">
+          <span class="git-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M14.5 8.5L8.5 14.5C7.7 15.3 6.3 15.3 5.5 14.5L1.5 10.5C0.7 9.7 0.7 8.3 1.5 7.5L7.5 1.5C8.3 0.7 9.7 0.7 10.5 1.5L14.5 5.5C15.3 6.3 15.3 7.7 14.5 8.5Z" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </span>
+          Live Git Changes
+          <div class="live-dot"></div>
+        </div>
+      </div>
+
+      <!-- MODEL TABS (Dynamic based on selected models) -->
+      <div class="model-tabs-container">
+        <div class="model-tabs" id="model-tabs">
+          <!-- Dynamically populated -->
+        </div>
+        <div class="no-tabs-msg" id="no-tabs-msg" style="display: none;">
+          Select models to view their changes
+        </div>
+      </div>
+
+      <!-- Diff Summary -->
+      <div class="diff-summary" id="diff-summary" style="display: none;">
+        <span class="stat"><span style="color: var(--accent-green);" id="summary-additions">+0</span></span>
+        <span class="stat"><span style="color: var(--accent-red);" id="summary-deletions">-0</span></span>
+        <span class="stat"><span id="summary-files">0 files changed</span></span>
+      </div>
+
+      <!-- Diff Content -->
+      <div class="diff-content" id="diff-content">
+        <div class="diff-empty">
+          <div class="empty-icon">◇</div>
+          <span>No code changes detected</span>
+        </div>
+      </div>
+
+      <!-- Terminal -->
+      <div class="terminal-section">
+        <div class="terminal-header">
+          <span class="terminal-title">Terminal</span>
+          <div class="terminal-actions">
+            <button class="terminal-action" title="Refresh">↻</button>
+            <button class="terminal-action" title="Clear">🗑</button>
+            <button class="terminal-action" title="Copy">⧉</button>
+            <button class="terminal-action" title="Expand">⤢</button>
+          </div>
+        </div>
+        <div class="terminal-body">
+          <span class="terminal-prompt">$</span> <span id="terminal-output"></span>
+        </div>
+      </div>
+
+      <!-- Push to Branch (Dynamic per model) -->
+      <div class="push-section" id="push-section">
+        <div class="push-label">Push to branch:</div>
+        <div id="push-content">
+          <div class="push-no-model">Select a model tab to push changes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ===== STATE =====
+    const allModels = {{ models | tojson }};
+    let selectedModelIds = ['claude-opus-4.6', 'claude-sonnet-4.5', 'claude-sonnet-4.6']; // default 3 selected
+    let activeTabId = 'claude-opus-4.6';
+    let diffCache = {};
+    let multiAgentEnabled = true;
+
+    // ===== INIT =====
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+      // Pre-fetch diffs for selected models
+      selectedModelIds.forEach(id => fetchDiff(id));
+    });
+
+    // ===== RENDER ALL =====
+    function renderAll() {
+      renderAgentChips();
+      renderBranches();
+      renderModelTabs();
+      renderDiffContent();
+      renderPushSection();
+      updateDropdownChecks();
+    }
+
+    // ===== AGENT CHIPS =====
+    function renderAgentChips() {
+      const container = document.getElementById('agent-chips');
+      container.innerHTML = '';
+      const selected = allModels.filter(m => selectedModelIds.includes(m.id));
+      selected.forEach((model, i) => {
+        const chip = document.createElement('div');
+        chip.className = 'agent-chip selected';
+        chip.innerHTML = `<span class="agent-dot" style="background: ${model.color};"></span>${model.provider} (${model.name})`;
+        chip.onclick = () => setActiveTab(model.id);
+        container.appendChild(chip);
+        if (i < selected.length - 1) {
+          const sep = document.createElement('span');
+          sep.className = 'agent-separator';
+          sep.textContent = '·';
+          container.appendChild(sep);
+        }
+      });
+    }
+
+    // ===== BRANCHES =====
+    function renderBranches() {
+      const container = document.getElementById('branches-list');
+      container.innerHTML = '';
+      const selected = allModels.filter(m => selectedModelIds.includes(m.id));
+      selected.forEach((model, i) => {
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; align-items: center; gap: 4px; margin-bottom: 4px;';
+        wrapper.innerHTML = `
+          <span style="font-size: 12px; color: var(--text-muted);">🔀 ${model.provider} (${model.name.split(' ')[0]} ${model.name.split(' ')[1] || ''}):</span>
+          <span class="branch-tag" onclick="copyBranch('${model.branch}')">
+            ${model.branch}
+            <span class="copy-icon">⧉</span>
+          </span>
+        `;
+        container.appendChild(wrapper);
+      });
+      if (selected.length > 2) {
+        // Show "Show X more" link if many
+      }
+    }
+
+    // ===== MODEL TABS =====
+    function renderModelTabs() {
+      const tabsContainer = document.getElementById('model-tabs');
+      const noTabsMsg = document.getElementById('no-tabs-msg');
+      tabsContainer.innerHTML = '';
+
+      const selected = allModels.filter(m => selectedModelIds.includes(m.id));
+
+      if (selected.length === 0) {
+        noTabsMsg.style.display = 'block';
+        tabsContainer.style.display = 'none';
+        return;
+      }
+
+      noTabsMsg.style.display = 'none';
+      tabsContainer.style.display = 'flex';
+
+      // If active tab is not in selected, switch to first
+      if (!selectedModelIds.includes(activeTabId)) {
+        activeTabId = selectedModelIds[0];
+      }
+
+      selected.forEach(model => {
+        const tab = document.createElement('div');
+        tab.className = `model-tab ${model.id === activeTabId ? 'active' : ''}`;
+        tab.onclick = () => setActiveTab(model.id);
+
+        const diff = diffCache[model.id];
+        const changeCount = diff ? diff.stats.files_changed : 0;
+
+        tab.innerHTML = `
+          <span class="tab-dot" style="background: ${model.color};"></span>
+          <span>${model.name}</span>
+          ${changeCount > 0 ? `<span class="tab-changes">${changeCount}</span>` : ''}
+        `;
+        tabsContainer.appendChild(tab);
+      });
+    }
+
+    // ===== SET ACTIVE TAB =====
+    function setActiveTab(modelId) {
+      activeTabId = modelId;
+      renderModelTabs();
+      renderDiffContent();
+      renderPushSection();
+      fetchDiff(modelId);
+
+      // Update active agent label
+      const model = allModels.find(m => m.id === modelId);
+      if (model) {
+        document.getElementById('active-agent-label').textContent = model.name;
+      }
+    }
+
+    // ===== FETCH DIFF =====
+    async function fetchDiff(modelId) {
+      if (diffCache[modelId]) {
+        renderDiffContent();
+        renderModelTabs();
+        return;
+      }
+      try {
+        const res = await fetch(`/api/diff/${modelId}`);
+        const data = await res.json();
+        diffCache[modelId] = data;
+        if (modelId === activeTabId) {
+          renderDiffContent();
+        }
+        renderModelTabs();
+      } catch (e) {
+        console.error('Failed to fetch diff:', e);
+      }
+    }
+
+    // ===== RENDER DIFF CONTENT =====
+    function renderDiffContent() {
+      const container = document.getElementById('diff-content');
+      const summary = document.getElementById('diff-summary');
+      const diff = diffCache[activeTabId];
+
+      if (!diff || diff.files.length === 0) {
+        container.innerHTML = `
+          <div class="diff-empty">
+            <div class="empty-icon">◇</div>
+            <span>No code changes detected</span>
+          </div>
+        `;
+        summary.style.display = 'none';
+        return;
+      }
+
+      // Summary
+      summary.style.display = 'flex';
+      document.getElementById('summary-additions').textContent = `+${diff.stats.additions}`;
+      document.getElementById('summary-deletions').textContent = `-${diff.stats.deletions}`;
+      document.getElementById('summary-files').textContent = `${diff.stats.files_changed} file${diff.stats.files_changed !== 1 ? 's' : ''} changed`;
+
+      // Files
+      let html = '';
+      diff.files.forEach(file => {
+        html += `<div class="diff-file">`;
+        html += `<div class="diff-file-header">`;
+        html += `<div class="diff-file-name">`;
+        html += `<span class="diff-file-status ${file.status}">${file.status}</span>`;
+        html += `<span>${file.name}</span>`;
+        html += `</div>`;
+        html += `<div class="diff-file-stats">`;
+        html += `<span class="additions">+${file.additions}</span>`;
+        html += `<span class="deletions">-${file.deletions}</span>`;
+        html += `</div>`;
+        html += `</div>`;
+        html += `<div class="diff-lines">`;
+        file.chunks.forEach(chunk => {
+          html += `<div class="diff-line header">${escapeHtml(chunk.header)}</div>`;
+          chunk.lines.forEach(line => {
+            const prefix = line.type === 'add' ? '+' : line.type === 'remove' ? '-' : ' ';
+            html += `<div class="diff-line ${line.type}">${prefix} ${escapeHtml(line.content)}</div>`;
+          });
+        });
+        html += `</div></div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // ===== RENDER PUSH SECTION =====
+    function renderPushSection() {
+      const container = document.getElementById('push-content');
+      const model = allModels.find(m => m.id === activeTabId);
+      const diff = diffCache[activeTabId];
+      const hasChanges = diff && diff.stats.files_changed > 0;
+
+      if (!model || !selectedModelIds.includes(activeTabId)) {
+        container.innerHTML = `<div class="push-no-model">Select a model tab to push changes</div>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="push-branch-info">
+          <span class="push-branch-name" title="${model.branch}">${model.branch}</span>
+        </div>
+        <div class="push-actions">
+          <button class="push-btn" title="Create PR" onclick="showToast('PR created for ${model.branch}')">⊕</button>
+          <button class="push-btn push-main" title="Push changes" ${!hasChanges ? 'disabled' : ''} onclick="pushChanges('${model.id}')">⬆</button>
+        </div>
+        <div style="margin-top: 6px; font-size: 11px; color: var(--text-muted);">
+          ${hasChanges ? `${diff.stats.files_changed} file(s) ready to push for <strong style="color: var(--text-secondary);">${model.name}</strong>` : `No changes to push for <strong style="color: var(--text-secondary);">${model.name}</strong>`}
+        </div>
+      `;
+    }
+
+    // ===== TOGGLE MODEL SELECTION =====
+    function toggleModelSelection(modelId) {
+      const idx = selectedModelIds.indexOf(modelId);
+      if (idx >= 0) {
+        if (selectedModelIds.length <= 1) {
+          showToast('At least one model must be selected');
+          return;
+        }
+        selectedModelIds.splice(idx, 1);
+      } else {
+        selectedModelIds.push(modelId);
+        fetchDiff(modelId);
+      }
+      renderAll();
+    }
+
+    // ===== TOGGLE MULTI-AGENT =====
+    function toggleMultiAgent() {
+      multiAgentEnabled = !multiAgentEnabled;
+      const toggle = document.getElementById('multi-agent-toggle');
+      toggle.classList.toggle('active', multiAgentEnabled);
+
+      if (!multiAgentEnabled) {
+        // Keep only the active tab model
+        selectedModelIds = [activeTabId];
+        renderAll();
+        showToast('Single agent mode — only one model active');
+      } else {
+        showToast('Multi-agent mode enabled');
+      }
+    }
+
+    // ===== DROPDOWN =====
+    function toggleModelDropdown() {
+      const dropdown = document.getElementById('model-dropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    function updateDropdownChecks() {
+      allModels.forEach(model => {
+        const check = document.getElementById(`check-${model.id}`);
+        const item = check.closest('.model-dropdown-item');
+        if (selectedModelIds.includes(model.id)) {
+          check.textContent = '✓';
+          item.classList.add('selected');
+        } else {
+          check.textContent = '';
+          item.classList.remove('selected');
+        }
+      });
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('model-dropdown');
+      if (!e.target.closest('.model-dropdown') && !e.target.closest('.add-model-btn') && !e.target.closest('.model-selector')) {
+        dropdown.classList.remove('show');
+      }
+    });
+
+    // ===== PUSH CHANGES =====
+    async function pushChanges(modelId) {
+      const model = allModels.find(m => m.id === modelId);
+      showToast(`Pushing changes to ${model.branch}...`);
+
+      try {
+        const res = await fetch(`/api/push/${modelId}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          // Show in terminal
+          const terminal = document.getElementById('terminal-output');
+          terminal.innerHTML = `git push origin ${model.branch}<br><span style="color: var(--accent-green);">✓ ${data.message}</span>`;
+          showToast(`Successfully pushed to ${model.branch}`);
+        }
+      } catch (e) {
+        showToast('Push failed: ' + e.message);
+      }
+    }
+
+    // ===== COPY BRANCH =====
+    function copyBranch(branch) {
+      navigator.clipboard.writeText(branch).then(() => {
+        showToast('Branch name copied!');
+      });
+    }
+
+    // ===== TOAST =====
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // ===== UTILS =====
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>
